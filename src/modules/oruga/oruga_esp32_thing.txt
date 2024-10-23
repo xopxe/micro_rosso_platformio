@@ -1,0 +1,40 @@
+## Pines
+
+micro_rosso.h:
+
+```
+#define CONSOLE_PIN_RX 16
+#define CONSOLE_PIN_TX 17
+#define I2C_SCL 22 // default value 22
+#define I2C_SDA 21 // default value 21
+#define LED_ROS2_PIN 5
+```
+
+env\_dht22.cpp:
+
+```
+#define DHT_SENSOR_PIN 25  // support pull-up: 2,4,5,12,13,14,15,25,26,27
+```
+
+mobility\_tracked\_config.h:
+
+```
+#define SABERTOOTH_TX_PIN 13
+#define ENCODER_rr_lft_PIN_A 27
+#define ENCODER_rr_lft_PIN_B 26
+#define ENCODER_fr_lft_PIN_A 33
+#define ENCODER_fr_lft_PIN_B 32
+#define ENCODER_fr_rgt_PIN_A 34
+#define ENCODER_fr_rgt_PIN_B 35
+#define ENCODER_rr_rgt_PIN_A 36
+#define ENCODER_rr_rgt_PIN_B 37
+```
+
+
+## todo
+
+* pin adc para medir voltaje de batería
+
+* pin sensado kill switch
+
+
