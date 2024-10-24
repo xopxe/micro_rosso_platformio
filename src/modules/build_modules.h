@@ -2,7 +2,7 @@
 #define BUILD_ENV_DHT22
 
 #define BUILD_IMU_BNO08X
-#define BUILD_IMU_NPU6050
+#define BUILD_IMU_MPU6050
 
 #define BUILD_SYNC_TIME
 

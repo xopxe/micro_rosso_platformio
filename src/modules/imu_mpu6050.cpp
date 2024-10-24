@@ -1,5 +1,5 @@
 #include "build_modules.h"
-#ifdef BUILD_IMU_NPU6050
+#ifdef BUILD_IMU_MPU6050
 
 #define MPU6050_RANGE_G MPU6050_RANGE_4_G        // 2, 4, 8, 16 G
 #define MPU6050_RANGE_DEG MPU6050_RANGE_250_DEG  // 250, 500, 1000, 2000 deg/s
@@ -142,5 +142,5 @@ bool ImuMPU6050::setup() {
   return true;
 }
 
-#endif // BUILD_IMU_NPU6050
+#endif // BUILD_IMU_MPU6050
 
