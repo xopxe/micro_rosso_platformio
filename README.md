@@ -6,11 +6,12 @@ This is a modular system for micro-ros-platformio. It allows you to write module
 
 **micro-ros on the agent**
 
-Install [Arduino micro-ros](https://www.hackster.io/514301/micro-ros-on-esp32-using-arduino-ide-1360ca) environment.
+You can either: 
 
-Another handy tutorial [here](https://medium.com/@kabilankb2003/seamless-communication-between-jetson-nano-and-esp32-with-microros-bd82c1cc7c53)
+* build and install the agent in a workspace, like [here](https://www.hackster.io/514301/micro-ros-on-esp32-using-arduino-ide-1360ca) or [here](https://medium.com/@kabilankb2003/seamless-communication-between-jetson-nano-and-esp32-with-microros-bd82c1cc7c53)
 
-TODO Find better docs, not Arduino centered?
+* run it directly from a docker image:
+```$ docker run -it --rm --net=host microros/micro-ros-agent:humble serial --dev /dev/ttyUSB0```
 
 **Board support**
 
@@ -289,11 +290,12 @@ bool MyModule::setup() {
 ## Example commands
 
 ```
+$ docker run -it --rm --net=host microros/micro-ros-agent:humble serial --dev /dev/ttyUSB0
 $ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
 $ ros2 run micro_ros_agent micro_ros_agent udp4 --port 2024
 $ picocom --baud 115200 /dev/ttyUSB1
 $ ros2 topic list
-$ ros2 topic echo "/imu/raw"
+$ ros2 topic echo /imu/raw
 $ ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.1, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
 $ ros2 service call /sync_time example_interfaces/srv/Trigger "{}"
 $ ros2 topic echo /rosout --field msg
