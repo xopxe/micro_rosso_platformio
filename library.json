@@ -28,6 +28,10 @@
       "madhephaestus/ESP32Encoder": "^0.11.7",
       "rafaelreyescarmona/Time32": "^1.1.3"
     },
+    "build": {
+      "srcDir": "src"
+    },
+
     "frameworks": "arduino",
     "platforms": "espressif32"
   }
