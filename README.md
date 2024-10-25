@@ -224,8 +224,8 @@ To create and announce a service, see the example in the `sync_time` module. Fir
 
 ```
 static service_descriptor my_service;
-example_interfaces__srv__Trigger_Request req_service;
-example_interfaces__srv__Trigger_Response res_service;
+std_srvs__srv__Trigger_Request req_service;
+std_srvs__srv__Trigger_Response res_service;
 ```
 
 Then, create the callback function for the service:
@@ -233,8 +233,8 @@ Then, create the callback function for the service:
 ```
 static void service_cb(const void* req, void* res) {
   // request and response can be cast from the call:
-  // example_interfaces__srv__Trigger_Response* res_in = 
-  //   (example_interfaces__srv__Trigger_Response*)res;
+  // std_srvs__srv__Trigger_Response* res_in = 
+  //   (std_srvs__srv__Trigger_Response*)res;
 
   res_service.success = micro_rosso::time_sync(); // implement the service, return status
 }
@@ -245,7 +245,7 @@ Finally, configure and register the service descriptor:
 ```
   my_service.qos = QOS_DEFAULT; // can also be QOS_BEST_EFFORT
   my_service.type_support =
-    ROSIDL_GET_SRV_TYPE_SUPPORT(example_interfaces, srv, Trigger);
+    ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, Trigger);
   my_service_sync_time.service_name = "/my_service_name";
   my_service.request = &req_service;
   my_service.response = &res_service;
@@ -297,7 +297,7 @@ $ picocom --baud 115200 /dev/ttyUSB1
 $ ros2 topic list
 $ ros2 topic echo /imu/raw
 $ ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.1, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
-$ ros2 service call /sync_time example_interfaces/srv/Trigger "{}"
+$ ros2 service call /sync_time std_srvs/srv/Trigger "{}"
 $ ros2 topic echo /rosout --field msg
 ```
 

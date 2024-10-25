@@ -3,7 +3,6 @@
 
 #define TIMER_TICK_MS 1000  // 1Hz
 #define TICKER_TOPIC_TICK "/tick"
-#define TICKER_SERVICE_ADD "/add"
 
 class Ticker {
 public:

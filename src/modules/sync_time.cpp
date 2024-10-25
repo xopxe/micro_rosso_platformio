@@ -4,13 +4,13 @@
 #include "micro_rosso.h"
 
 #include "sync_time.h"
-#include <example_interfaces/srv/trigger.h>
+#include <std_srvs/srv/trigger.h>
 
 
 static service_descriptor sdescriptor_sync_time;
 
-example_interfaces__srv__Trigger_Request req_sync_time;
-example_interfaces__srv__Trigger_Response res_sync_time;
+std_srvs__srv__Trigger_Request req_sync_time;
+std_srvs__srv__Trigger_Response res_sync_time;
 static const char res_sync_time_message = '\0';  // https://github.com/micro-ROS/micro_ros_arduino/issues/101
 
 #define RCCHECK(fn) \
@@ -27,7 +27,7 @@ static const char res_sync_time_message = '\0';  // https://github.com/micro-ROS
 SyncTime::SyncTime(){};
 
 static void service_sync_time_cb(const void* req, void* res) {
-  //example_interfaces__srv__Trigger_Response* res_in = (example_interfaces__srv__Trigger_Response*)res;
+  //std_srvs__srv__Trigger_Response* res_in = (std_srvs__srv__Trigger_Response*)res;
 
   res_sync_time.success = micro_rosso::time_sync();
 }
@@ -42,7 +42,7 @@ bool SyncTime::setup() {
 
   sdescriptor_sync_time.qos = QOS_DEFAULT;
   sdescriptor_sync_time.type_support =
-    ROSIDL_GET_SRV_TYPE_SUPPORT(example_interfaces, srv, Trigger);
+    ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, Trigger);
   sdescriptor_sync_time.service_name = SERVICE_SYNC_TIME;
   sdescriptor_sync_time.request = &req_sync_time;
   sdescriptor_sync_time.response = &res_sync_time;
