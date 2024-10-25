@@ -1,8 +1,8 @@
 {
-    "name": "micro_rosso",
+    "name": "micro_rosso_platformio",
     "version": "0.0.1",
     "description": "A modular system for micro ros",
-    "keywords": "ros, robot",
+    "keywords": "ros, microros, robot",
     "repository":
     {
       "type": "git",
