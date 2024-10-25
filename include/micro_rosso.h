@@ -86,8 +86,12 @@ class micro_rosso {
 
 public:
 
-  static bool setup();
-  
+  #if defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI) 
+  static bool setup(char * ssid, char * pass, IPAddress agent_ip, uint16_t agent_port);
+  #elif defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL) 
+  static bool setup(HardwareSerial &serial=Serial, unsigned long baud=115200);
+  #endif
+
   static Logger logger;
 
 

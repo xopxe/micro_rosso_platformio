@@ -140,7 +140,7 @@ static void timer_handler_report (rcl_timer_t* timer, int64_t last_call_time) {
 }
 
 
-bool micro_rosso::setup() {
+static bool start_services() {
   reset_reason_0 = rtc_get_reset_reason(0);
   reset_reason_1 = rtc_get_reset_reason(1);
 
@@ -148,25 +148,6 @@ bool micro_rosso::setup() {
 
   ros_state = WAITING_AGENT;
   ros_state_last = AGENT_DISCONNECTED; // trigger first notification
-
-  D_println("Setting up transport... ");
-  #if defined(TRANSPORT_WIFI)
-  #if defined(TRANSPORT_WIFI_STATIC_IP)
-  WiFi.config(TRANSPORT_WIFI_STATIC_IP,TRANSPORT_WIFI_STATIC_GATEWAY, TRANSPORT_WIFI_STATIC_SUBNET);
-  #endif
-  set_microros_wifi_transports(
-    TRANSPORT_WIFI_SSID, 
-    TRANSPORT_WIFI_PASS, 
-    TRANSPORT_WIFI_AGENT_IP, 
-    TRANSPORT_WIFI_PORT);
-  #elif defined(TRANSPORT_SERIAL)
-  Serial.begin(TRANSPORT_SERIAL_BAUD);
-  set_microros_serial_transports(TRANSPORT_SERIAL);
-  #else
-  Serial.begin(115200);
-  set_microros_serial_transports(Serial);
-  #endif
-  D_println("Done.");
 
   if (!micro_rosso::logger.setup()) {
     D_println("FAIL logger.setup()");
@@ -181,9 +162,29 @@ bool micro_rosso::setup() {
   micro_rosso::timer_report.timeout_ns = RCL_MS_TO_NS(TIMER_REPORT_MS);
   micro_rosso::timer_report.timer_handler = timer_handler_report;
   micro_rosso::timers.push_back(&micro_rosso::timer_report);
-  
+
   return true;
 }
+
+#if defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI) 
+bool micro_rosso::setup(char * ssid, char * pass, IPAddress agent_ip, uint16_t agent_port) {
+  D_println("Setting up transport... ");
+  D_println("using dhcp, for static ip use WiFi.config();");
+  //WiFi.config(TRANSPORT_WIFI_STATIC_IP,TRANSPORT_WIFI_STATIC_GATEWAY, TRANSPORT_WIFI_STATIC_SUBNET);
+  set_microros_wifi_transports(ssid, pass, agent_ip, agent_port);
+  D_println("Done.");
+  return start_services();
+}
+#elif defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL) 
+bool micro_rosso::setup(HardwareSerial &serial, unsigned long baud) {
+  D_println("Setting up transport... ");
+  Serial.begin(115200);
+  set_microros_serial_transports(Serial);
+  D_println("Done.");
+  return start_services();
+}
+#endif
+
 
 static const char* reset_reason_string(const RESET_REASON reason)
 {
