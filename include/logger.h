@@ -1,14 +1,12 @@
 #ifndef __roslogger_h
 #define __roslogger_h
 
-#define LOGGER_TOPIC_LOG "/rosout"
-
 #include <rcl_interfaces/msg/log.h>
 
 class Logger {
 public:
   Logger();
-  static bool setup();
+  static bool setup(const char* topic = "/rosout");
 
   static void log(const char* s,
                   const char* file = "",

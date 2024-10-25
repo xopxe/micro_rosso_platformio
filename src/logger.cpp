@@ -23,16 +23,16 @@ static publisher_descriptor pdescriptor_roslog;
 
 Logger::Logger() {}
 
-bool Logger::setup() {
+bool Logger::setup(const char* topic) {
   D_println("setup: roslogger");
 
-  msg_log.name.data = (char*)LOGGER_TOPIC_LOG;
+  msg_log.name.data = (char*)topic;
   msg_log.name.size = strlen(msg_log.name.data);
 
   pdescriptor_roslog.qos = QOS_DEFAULT;
   pdescriptor_roslog.type_support = (rosidl_message_type_support_t*)
     ROSIDL_GET_MSG_TYPE_SUPPORT(rcl_interfaces, msg, Log);
-  pdescriptor_roslog.topic_name = LOGGER_TOPIC_LOG;
+  pdescriptor_roslog.topic_name = topic;
   micro_rosso::publishers.push_back(&pdescriptor_roslog);
 
   return true;
