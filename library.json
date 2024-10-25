@@ -6,7 +6,8 @@
     "repository":
     {
       "type": "git",
-      "url": "https://github.com/xopxe/micro_rosso_platformio"
+      "url": "https://github.com/xopxe/micro_rosso_platformio.git",
+      "branch": "modularization"
     },
     "authors":
     [
