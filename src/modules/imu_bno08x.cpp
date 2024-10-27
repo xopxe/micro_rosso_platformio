@@ -146,10 +146,10 @@ static void report_cb(int64_t last_call_time) {
   }
 }
 
-bool ImuBNO08x::setup() {
+bool ImuBNO08x::setup( TwoWire &wire ) {
   D_println("setup: imu_bno08x");
   delay(10);
-  if (!bno.begin(BNO08X_ADDR, Wire, BNO08X_INT, BNO08X_RST)) { return false; }
+  if (!bno.begin(BNO08X_ADDR, wire, BNO08X_INT, BNO08X_RST)) { return false; }
   if (!setReports()) { return false; }
 
   pdescriptor_imu.qos = QOS_DEFAULT;

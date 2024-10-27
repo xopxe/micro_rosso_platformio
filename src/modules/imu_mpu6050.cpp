@@ -115,9 +115,9 @@ static void report_cb(int64_t last_call_time) {
   }
 }
 
-bool ImuMPU6050::setup() {
+bool ImuMPU6050::setup( TwoWire &wire ) {
   D_println("setup imu_mpu6050");
-  if (!mpu.begin(MPU6050_I2CADDR_DEFAULT, &Wire, 0)) {
+  if (!mpu.begin(MPU6050_I2CADDR_DEFAULT, &wire, 0)) {
     return false;
   }
   mpu.setAccelerometerRange(MPU6050_RANGE_G);

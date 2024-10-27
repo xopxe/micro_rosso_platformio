@@ -156,8 +156,6 @@ bool micro_rosso::setup() {
     return false;
   };
 
-  Wire.begin(I2C_SDA, I2C_SCL);
-
   micro_rosso::timer_control.timeout_ns = RCL_MS_TO_NS(TIMER_CONTROL_MS);
   micro_rosso::timer_control.timer_handler = timer_handler_control;
   micro_rosso::timers.push_back(&micro_rosso::timer_control);

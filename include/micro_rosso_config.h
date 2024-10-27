@@ -19,12 +19,6 @@
 #define USE_SET_TIME
 
 /*
- I2C configration
-*/
-#define I2C_SCL 22
-#define I2C_SDA 21
-
-/*
  The two default timers created, one for control tasks
  (e.g. pid), and another for reporting (e.g. odom)
 */

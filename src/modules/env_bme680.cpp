@@ -7,7 +7,6 @@
 
 #include "env_bme680.h"
 
-#include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
 
@@ -36,7 +35,7 @@ static publisher_descriptor pdescriptor_gas_resistance;
     (void)temp_rc; \
   }
 
-Adafruit_BME680 bme;
+Adafruit_BME680 *bme;
 
 static unsigned long last_read_ms = 0;
 
@@ -48,15 +47,15 @@ EnvBME680::EnvBME680() {
 }
 
 void report_cb(int64_t last_call_time) {
-  int ramaining_millis = bme.remainingReadingMillis();
-  if (ramaining_millis == bme.reading_not_started) {
-    bme.beginReading();
+  int ramaining_millis = bme->remainingReadingMillis();
+  if (ramaining_millis == bme->reading_not_started) {
+    bme->beginReading();
     return;
   }
-  if (ramaining_millis > bme.reading_complete) {
+  if (ramaining_millis > bme->reading_complete) {
     return;
   }
-  if (!bme.endReading()) {
+  if (!bme->endReading()) {
     return;
   }
 
@@ -66,10 +65,10 @@ void report_cb(int64_t last_call_time) {
   }
   last_read_ms = now;
 
-  float t = bme.temperature;
-  float h = bme.humidity;
-  float p = bme.pressure / 100.0;
-  float r = bme.gas_resistance / 1000.0;  // KOhm
+  float t = bme->temperature;
+  float h = bme->humidity;
+  float p = bme->pressure / 100.0;
+  float r = bme->gas_resistance / 1000.0;  // KOhm
 
   if (msg_temperature.temperature != t) {
     msg_temperature.temperature = t;
@@ -104,18 +103,19 @@ void report_cb(int64_t last_call_time) {
   }
 }
 
-bool EnvBME680::setup() {
+bool EnvBME680::setup( TwoWire &wire ) {
   D_println("setup: env_bme680");
-  if (!bme.begin()) {
+  bme = new Adafruit_BME680(&wire);
+  if (!bme->begin()) {
     return false;
   }
 
   // Set up oversampling and filter initialization
-  bme.setTemperatureOversampling(BME680_OS_8X);
-  bme.setHumidityOversampling(BME680_OS_2X);
-  bme.setPressureOversampling(BME680_OS_4X);
-  bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
-  bme.setGasHeater(320, 150);  // 320*C for 150 ms
+  bme->setTemperatureOversampling(BME680_OS_8X);
+  bme->setHumidityOversampling(BME680_OS_2X);
+  bme->setPressureOversampling(BME680_OS_4X);
+  bme->setIIRFilterSize(BME680_FILTER_SIZE_3);
+  bme->setGasHeater(320, 150);  // 320*C for 150 ms
 
   pdescriptor_temperature.qos = QOS_DEFAULT;
   pdescriptor_temperature.type_support = (rosidl_message_type_support_t*)

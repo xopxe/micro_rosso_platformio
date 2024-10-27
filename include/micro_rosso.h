@@ -11,7 +11,6 @@
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
 
-#include <Wire.h>
 #include <vector>
 
 enum QosMode {

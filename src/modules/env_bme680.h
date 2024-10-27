@@ -1,6 +1,8 @@
 #ifndef __env_bme680_h
 #define __env_bme680_h
 
+#include <Wire.h>
+
 #define BME680_TOPIC_TEMPERATURE "/internal/temperature"
 #define BME680_TOPIC_HUMIDITY "/internal/humidity"
 #define BME680_TOPIC_PRESSURE "/internal/pressure"
@@ -9,7 +11,7 @@
 class EnvBME680 {
 public:
   EnvBME680();
-  static bool setup(); 
+  static bool setup(TwoWire &wire = Wire ); 
 };
 
 #endif  // __env_bme680_h
