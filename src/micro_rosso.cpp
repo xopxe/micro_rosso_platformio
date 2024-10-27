@@ -140,8 +140,8 @@ static void timer_handler_report (rcl_timer_t* timer, int64_t last_call_time) {
 }
 
 
-static bool start_services() {
-  D_print("Setting up services... ");
+bool micro_rosso::setup() {
+  D_println("Setting up micro_rosso... ");
 
   reset_reason_0 = rtc_get_reset_reason(0);
   reset_reason_1 = rtc_get_reset_reason(1);
@@ -169,34 +169,6 @@ static bool start_services() {
   D_println("Done.");
   return true;
 }
-
-#if defined(MICRO_ROS_TRANSPORT_ARDUINO_WIFI) 
-bool micro_rosso::setup(char * ssid, char * pass, IPAddress agent_ip, uint16_t agent_port) {
-  if (!start_services()) {
-    return false;
-  }
-
-  D_println("Setting up transport... ");
-  D_println("using dhcp, for static ip use WiFi.config();");
-  //WiFi.config(TRANSPORT_WIFI_STATIC_IP,TRANSPORT_WIFI_STATIC_GATEWAY, TRANSPORT_WIFI_STATIC_SUBNET);
-  set_microros_wifi_transports(ssid, pass, agent_ip, agent_port);
-  D_println("Done.");
-  return true;
-}
-#elif defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL) 
-bool micro_rosso::setup(HardwareSerial &serial, unsigned long baud) {
-  if (!start_services()) {
-    return false;
-  }
-
-  D_println("Setting up transport... ");
-  Serial.begin(115200);
-  set_microros_serial_transports(Serial);
-  D_println("Done.");
-  return true;
-}
-#endif
-
 
 static const char* reset_reason_string(const RESET_REASON reason)
 {

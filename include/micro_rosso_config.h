@@ -31,5 +31,4 @@
 #define TIMER_CONTROL_MS 50  // 20Hz
 #define TIMER_REPORT_MS 200  // 5Hz
 
-
 #endif  // __micro_rosso_config_h
