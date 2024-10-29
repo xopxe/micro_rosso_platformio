@@ -1,6 +1,3 @@
-#include "build_modules.h"
-#ifdef BUILD_SYNC_TIME
-
 #include "micro_rosso.h"
 
 #include "sync_time.h"
@@ -52,6 +49,3 @@ bool SyncTime::setup() {
 
   return true;
 }
-
-#endif  // BUILD_SYNC_TIME
-
