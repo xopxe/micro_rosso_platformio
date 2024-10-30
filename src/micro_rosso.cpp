@@ -32,6 +32,8 @@ static rcl_node_t node;
 static rcl_allocator_t allocator;
 static rclc_executor_t executor;
 
+static const char *ros2_node_name; //ROS2_NODE_NAME
+
 ros_states ros_state;
 ros_states ros_state_last;
 
@@ -140,11 +142,13 @@ static void timer_handler_report (rcl_timer_t* timer, int64_t last_call_time) {
 }
 
 
-bool micro_rosso::setup() {
+bool micro_rosso::setup( const char* rosname ) {
   D_println("Setting up micro_rosso... ");
 
   reset_reason_0 = rtc_get_reset_reason(0);
   reset_reason_1 = rtc_get_reset_reason(1);
+
+  ros2_node_name = rosname;
 
   //delay(3000);
 

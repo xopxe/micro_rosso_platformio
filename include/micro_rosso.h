@@ -85,7 +85,7 @@ class micro_rosso {
 
 public:
 
-  static bool setup();
+  static bool setup( const char *ros2_node_name );
  
   static Logger logger;
 

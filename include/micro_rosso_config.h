@@ -1,7 +1,7 @@
 #ifndef __micro_rosso_config_h
 #define __micro_rosso_config_h
 
-#define ROS2_NODE_NAME "micro_rosso_rclc"
+//#define ROS2_NODE_NAME "micro_rosso_rclc"
 
 /*
  Serial console used for debug output. If commented, no output is prdouced.
