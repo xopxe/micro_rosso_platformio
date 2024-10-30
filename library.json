@@ -21,7 +21,6 @@
     "homepage": "https://github.com/xopxe/micro_rosso_platformio",
     "dependencies": {
       "micro_ros_platformio": "https://github.com/micro-ROS/micro_ros_platformio",
-      "madhephaestus/ESP32Encoder": "^0.11.7",
       "rafaelreyescarmona/Time32": "^1.1.3"
     },
     "frameworks": "arduino",
