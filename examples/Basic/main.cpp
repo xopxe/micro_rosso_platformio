@@ -1,22 +1,17 @@
 #include <Arduino.h>
-#include <micro_ros_platformio.h>
 
 #include "micro_rosso.h"
 
-#include "modules/ticker.h"
+#include "ticker.h"
 Ticker ticker;
 
-#include "modules/sync_time.h"
+#include "sync_time.h"
 SyncTime sync_time;
 
-#include "modules/ros_status.h"
+#include "ros_status.h"
 RosStatus ros_status;
 
 void setup() {
-  delay(2000);
-
-  D_SerialBegin(DEBUG_CONSOLE_BAUD, SERIAL_8N1, DEBUG_CONSOLE_PIN_RX, DEBUG_CONSOLE_PIN_TX);
-
   D_println("Booting...");
 
   if (!micro_rosso::setup()) {
