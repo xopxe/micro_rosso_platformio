@@ -21,46 +21,19 @@ This library is developped on ESP32 boards.
 
 * `micro_rosso.h`, `micro_rosso.cpp`: library used to create and run modules.
 
-* `micro_rosso_config.h`: configuration for `micro_rosso`. There you can configuire the ros2 node name, i2c pins, debugging console output, micro-ros transport, etc.
+* `micro_rosso_config.h`: configuration for `micro_rosso`. There you can configuire the ros2 node name, debugging console output, etc.
 
-* `logger.h`, `logger.cpp`: utility module pre-loaded by `micro_rosso` and used to send `/rosout` topics.
-
-* everything else in the `src/modules/` folder: modules and their dependencies.
-
-
-
-## Configuring micro_rosso 
-
-You can configure micro_rosso editing `micro_rosso_config.h` before building your project.
 
 
 ## Provided Modules
 
 Different modules have their own dependencies. If you do not want to build a module, comment the corresponding `#define` in `src/build_modules.h`.
 
-* `env_bme680` environmental sensor. Depends on the Adafruit BME680 library by Adafruit.
-
-* `env_dht22` environmental sensor.
-
-* `imu_bno08x` IMU. Depends on the SparkFun BNO08X Cortex Based IMU library by SparkFun Electronics
-
-* `imu_mpu6050`IMU. Depends on the Adafruit MPU6050 library by Adafruit.
-
-* `odom_helper` odometry library. Simple dead-reconing tracker and ROS2 odometry topic publisher.
-
 * `ros_status` module, allows to react to changes in the connection status (e.g., power on a LED when an agent is connected).
 
 * `sync_time` service. Sinchronize the microcontroller's clock to ROS2. Depends on the Time library by Michael Margolis. It's not strictly necessary and can be disabled by commenting the `#define USE_SET_TIME` in `micro_rosso_config.h`.
 
 * `ticker` publisher. Cerates a 1Hz timer.
-
-* `robotito/robotito_omni` module for the/robotito/ platform. Omnidirectional platform using two dual H-bridges. Depends on the Cdrv8833 library by Steffano Ledda, and the ESP32Encoder library by Kevin Harrington.
-
-* `robotito/robotito_apds9960` module for the/robotito/ platform. Supports the APDS9960 color/proximity/gesture sensor. Depends on the Arduino\_APDS9960 library by Arduino.
-
-* `robotito/robotito_vl53ring` module for the/robotito/ platform. Produces a laser\_scan fro the ring of VL53L0X TOF distance sensors. Depends on the Adafruit VL53L0X library by Adafruit.
-
-* `oruga/mobility_tracked` module for a tracked robot usng a Sabertooth motor controller. Depends on the ESP32Encoder library by Kevin Harrington. 
 
 
 
