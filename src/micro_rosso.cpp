@@ -220,7 +220,7 @@ static bool create_entities() {
   RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
 
   // create node
-  RCCHECK(rclc_node_init_default(&node, ROS2_NODE_NAME, "", &support));
+  RCCHECK(rclc_node_init_default(&node, ros2_node_name, "", &support));
 
   // create publisher
   for (int i = 0; i < micro_rosso::publishers.size(); i++) {
