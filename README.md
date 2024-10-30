@@ -1,39 +1,106 @@
 # micro rosso
 
-This is a modular system for micro-ros-platformio. It allows you to write modules that can interact with ROS2 sending and receiving topics, publishing services, and so on.
+This is a modular system for micro-ros under PlatformIO. It allows you to write modules that can interact with ROS2 sending and receiving topics, publishing services, and so on.
+
+For an example of an application that uses micro-rosso, see [oruga](https://github.com/xopxe/oruga), which is a tracked robot. If you see its [platformio.ini](https://github.com/xopxe/oruga/blob/main/platformio.ini) file, you'll see that it's an ESP32 project that uses Arduino framework, uses ROS2 humble, and depends on [micro-rosso](https://github.com/xopxe/micro_rosso_platformio) library. It provides its functionality in modules, such as the [mobility system](https://github.com/xopxe/oruga/tree/main/lib/mobility_tracked). It also depends on external modules, such as [mpu6050](https://github.com/xopxe/micro_rosso_mpu6050.) IMU.
 
 ## Install
 
-**micro-ros on the agent**
+To use micro-rosso, you need a working micro-ros environment and a PlatformIO environment.
 
-You can either: 
+**micro-ros**
 
-* build and install the agent in a workspace, like [here](https://www.hackster.io/514301/micro-ros-on-esp32-using-arduino-ide-1360ca) or [here](https://medium.com/@kabilankb2003/seamless-communication-between-jetson-nano-and-esp32-with-microros-bd82c1cc7c53)
+* [Install ROS2](https://docs.ros.org/en/dashing/Installation/Ubuntu-Install-Binary.html). We recommend adding `source /opt/ros/humble/setup.bash` to your `.bashrc` file (change the `humble` for whatever ROS2 version you installed).
 
-* run it directly from a docker image:
-```$ docker run -it --rm --net=host microros/micro-ros-agent:humble serial --dev /dev/ttyUSB0```
+* Install micro_ros environment:
+  ```
+  $ sudo apt install -y git cmake python3-pip python3-rosdep
+  $ mkdir -p ~/microros_ws/src
+  $ cd ~/microros_ws
+  $ git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup
+  $ sudo apt update && rosdep update
+  $ rosdep install --from-paths src --ignore-src -y
+  $ colcon build
+  $ source install/local_setup.bash
+  $ ros2 run micro_ros_setup create_agent_ws.sh
+  $ ros2 run micro_ros_setup build_agent.sh
+  $ source ~/microros_ws/install/local_setup.bash
+  ```
+We recommend adding `source ~/microros_ws/install/local_setup.bash` to your `.bashrc` file.
 
-**Board support**
+**PlatformIO environment**
 
-This library is developped on ESP32 boards.
+You can install PlatformIO inside VSCode following [this](https://docs.platformio.org/en/stable/integration/ide/vscode.html) tutorial.
+
+## Creating a project
+
+You can create an empty project using the IDE, selecting the framework, board, etc. Then you must edit the `platformio.ini` file to look something like this:
+
+```
+[env:pico32]
+platform = espressif32
+board = pico32 ; or whatever esp32 board you have
+framework = arduino
+board_microros_distro = humble  ; or jazzy, etc.
+board_microros_transport = serial
+
+lib_deps = 
+    https://github.com/xopxe/micro_rosso_platformio.git
+```
+The `board_microros_transport`field specifies how the board will communicate with the agent. The various options will be discussed later.
+
+This project is developed on ESP32 boards but can be adapted to other Arduino-compatible boards. 
+
+**Adding modules**
+
+For your project modules, we recommend placing them into the /lib/ project folder.
+
+For external modules, add the corresponding entry in [`lib_deps`](https://docs.platformio.org/en/latest/projectconf/sections/env/options/library/lib_deps.html).
+
 
 ## Files
 
 * `micro_rosso.h`, `micro_rosso.cpp`: library used to create and run modules.
 
-* `micro_rosso_config.h`: configuration for `micro_rosso`. There you can configuire the ros2 node name, debugging console output, etc.
+* `micro_rosso_config.h`: internal configuration for `micro_rosso`.
 
+* `logger.h`, `logger.cpp`: utility module pre-loaded by `micro_rosso` and used to send `/rosout` topics.
+
+* `sync_time.h`, `sync_time.cpp`: utility module for a service to synchronize the board's clock to the agent.
+
+* `ros_status.h`, `ros_status.cpp`: utility module that watches the connection status and can provide output, like lighting a LED when the board is connected to the agent..
+
+
+**FORM HERE**
 
 
 ## Provided Modules
 
-Different modules have their own dependencies. If you do not want to build a module, comment the corresponding `#define` in `src/build_modules.h`.
+Different modules have their own dependencies.
+
+* `env_bme680` environmental sensor. Depends on the Adafruit BME680 library by Adafruit.
+
+* `env_dht22` environmental sensor.
+
+* `imu_bno08x` IMU. Depends on the SparkFun BNO08X Cortex Based IMU library by SparkFun Electronics
+
+* `imu_mpu6050`IMU. Depends on the Adafruit MPU6050 library by Adafruit.
+
+* `odom_helper` odometry library. Simple dead-reconing tracker and ROS2 odometry topic publisher.
 
 * `ros_status` module, allows to react to changes in the connection status (e.g., power on a LED when an agent is connected).
 
 * `sync_time` service. Sinchronize the microcontroller's clock to ROS2. Depends on the Time library by Michael Margolis. It's not strictly necessary and can be disabled by commenting the `#define USE_SET_TIME` in `micro_rosso_config.h`.
 
 * `ticker` publisher. Cerates a 1Hz timer.
+
+* `robotito/robotito_omni` module for the/robotito/ platform. Omnidirectional platform using two dual H-bridges. Depends on the Cdrv8833 library by Steffano Ledda, and the ESP32Encoder library by Kevin Harrington.
+
+* `robotito/robotito_apds9960` module for the/robotito/ platform. Supports the APDS9960 color/proximity/gesture sensor. Depends on the Arduino\_APDS9960 library by Arduino.
+
+* `robotito/robotito_vl53ring` module for the/robotito/ platform. Produces a laser\_scan fro the ring of VL53L0X TOF distance sensors. Depends on the Adafruit VL53L0X library by Adafruit.
+
+* `oruga/mobility_tracked` module for a tracked robot usng a Sabertooth motor controller. Depends on the ESP32Encoder library by Kevin Harrington. 
 
 
 
@@ -263,12 +330,11 @@ bool MyModule::setup() {
 ## Example commands
 
 ```
-$ docker run -it --rm --net=host microros/micro-ros-agent:humble serial --dev /dev/ttyUSB0
 $ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
 $ ros2 run micro_ros_agent micro_ros_agent udp4 --port 2024
 $ picocom --baud 115200 /dev/ttyUSB1
 $ ros2 topic list
-$ ros2 topic echo /imu/raw
+$ ros2 topic echo "/imu/raw"
 $ ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.1, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
 $ ros2 service call /sync_time std_srvs/srv/Trigger "{}"
 $ ros2 topic echo /rosout --field msg
@@ -283,4 +349,5 @@ jvisca@fing.edu.uy - [Grupo MINA](https://www.fing.edu.uy/inco/grupos/mina/), Fa
 ## License
 
 MIT
+
 
