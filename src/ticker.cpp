@@ -1,6 +1,3 @@
-#include "build_modules.h"
-#ifdef BUILD_TICKER
-
 #include "micro_rosso.h"
 
 #include "ticker.h"
@@ -59,6 +56,3 @@ bool Ticker::setup() {
 
   return true;
 }
-
-#endif // BUILD_TICKER
-
