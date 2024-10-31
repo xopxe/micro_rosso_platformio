@@ -2,7 +2,7 @@
 
 This is a modular system for micro-ros under PlatformIO. It allows you to write modules that can interact with ROS2 sending and receiving topics, publishing services, and so on.
 
-For an example of an application that uses micro-rosso, see [oruga](https://github.com/xopxe/oruga), which is a tracked robot. If you see its [platformio.ini](https://github.com/xopxe/oruga/blob/main/platformio.ini) file, you'll see that it's an ESP32 project that uses Arduino framework, uses ROS2 humble, and depends on [micro-rosso](https://github.com/xopxe/micro_rosso_platformio) library. It provides its functionality in modules, such as the [mobility system](https://github.com/xopxe/oruga/tree/main/lib/mobility_tracked). It also depends on external modules, such as [mpu6050](https://github.com/xopxe/micro_rosso_mpu6050.) IMU.
+For an example of an application that uses micro-rosso, see [oruga](https://github.com/xopxe/oruga), a tracked robot. If you see its [platformio.ini](https://github.com/xopxe/oruga/blob/main/platformio.ini) file, you'll see that it's an ESP32 project that uses Arduino framework, uses ROS2 humble, and depends on [micro-rosso](https://github.com/xopxe/micro_rosso_platformio) library. It provides its functionality in modules, such as the [mobility system](https://github.com/xopxe/oruga/tree/main/lib/mobility_tracked). It also depends on external modules, such as [mpu6050](https://github.com/xopxe/micro_rosso_mpu6050.) IMU.
 
 ## Install
 
@@ -70,46 +70,29 @@ For external modules, add the corresponding entry in [`lib_deps`](https://docs.p
 
 * `ros_status.h`, `ros_status.cpp`: utility module that watches the connection status and can provide output, like lighting a LED when the board is connected to the agent..
 
+* `ticker.h`, `ticker.cpp`: utility module that creates a 1Hz timer and uses it to regularly send to a topic.
+
 
 **FORM HERE**
 
 
-## Provided Modules
-
-Different modules have their own dependencies.
-
-* `env_bme680` environmental sensor. Depends on the Adafruit BME680 library by Adafruit.
-
-* `env_dht22` environmental sensor.
-
-* `imu_bno08x` IMU. Depends on the SparkFun BNO08X Cortex Based IMU library by SparkFun Electronics
-
-* `imu_mpu6050`IMU. Depends on the Adafruit MPU6050 library by Adafruit.
-
-* `odom_helper` odometry library. Simple dead-reconing tracker and ROS2 odometry topic publisher.
-
-* `ros_status` module, allows to react to changes in the connection status (e.g., power on a LED when an agent is connected).
-
-* `sync_time` service. Sinchronize the microcontroller's clock to ROS2. Depends on the Time library by Michael Margolis. It's not strictly necessary and can be disabled by commenting the `#define USE_SET_TIME` in `micro_rosso_config.h`.
-
-* `ticker` publisher. Cerates a 1Hz timer.
-
-* `robotito/robotito_omni` module for the/robotito/ platform. Omnidirectional platform using two dual H-bridges. Depends on the Cdrv8833 library by Steffano Ledda, and the ESP32Encoder library by Kevin Harrington.
-
-* `robotito/robotito_apds9960` module for the/robotito/ platform. Supports the APDS9960 color/proximity/gesture sensor. Depends on the Arduino\_APDS9960 library by Arduino.
-
-* `robotito/robotito_vl53ring` module for the/robotito/ platform. Produces a laser\_scan fro the ring of VL53L0X TOF distance sensors. Depends on the Adafruit VL53L0X library by Adafruit.
-
-* `oruga/mobility_tracked` module for a tracked robot usng a Sabertooth motor controller. Depends on the ESP32Encoder library by Kevin Harrington. 
-
-
-
 ## How to use modules
+First, we will show how to use a third-part module; later, we will describe how to create your own. 
 
-To start a module, you must include and, if needed, configure it in `micro_rosso.ino`. As a typical example for the module for the mpu6050 imu, add the following somewhere near the top and after the `#include "micro_rosso.h"`: 
+A module is imported as a standard PlatformIO library in any standard way. As an example, we will import the MPU6050 module from GitHub, adding the following entry to the platformio.ini` file:
 
 ```
-#include "imu_mpu6050.h"
+lib_deps = 
+    https://github.com/xopxe/micro_rosso_platformio.git
+    https://github.com/xopxe/micro_rosso_mpu6050.git
+```
+
+/TIP: include from a local folder to reduce rebuilding time/
+
+To start a module, you must include and, if needed, configure it in your `main.cpp`. Following mpu6050 example, add the following somewhere near the top and after the `#include "micro_rosso.h"`: 
+
+```
+#include "micro_rosso_mpu6050.h"
 ImuMPU6050 imu;
 ```
 
@@ -124,18 +107,26 @@ void setup() {
 }
 ```
 
-Usually, modules' setup method return `false` if something fails. `D_print` and `D_println` are macros that print to a debug console (see `DEBUG_CONSOLE` macros in `micro_rosso.h` to see if it is enabled and where it goes to).
+Check the `setup()` call to see what optional parameter you can pass to it, such as the I2C channel, topic names, etc.
+
+Usually, modules' setup method returns `false` if something fails. `D_print` and `D_println` are macros that print to a debug console (see `DEBUG_CONSOLE` macros in `micro_rosso_config.h` to see if it is enabled and where it goes to).
 
 
 ## How to write a module
 
-A micro\_rosso module is a mostly static object that provides a setup method where it registers ros2 resources using `micro_rosso.h`. It then uses ros2arduino and other modules to implement its own functionality.
+A micro\_rosso module is a mostly static object that provides a setup method where it registers ros2 resources using `micro_rosso.h`. It then uses micro_ros_platformio and other modules to implement its own functionality.
 
 Things a module can do:
 
 ### Subscribe to topics
 
-The following example is derived from the `mobility_tracked` module. It will subscribe to `/cmd_vel` topics of type `cmd_vel`.
+You have various options where to place libraries in your project:
+
+* Both .h and .cpp files in the src/ directory. (quick and dirty)
+* The .h in the include/ folder, the .cpp in src/ (good for when you are writing a library you will publish)
+* In a lib/my_module/ folder (good for private modules that only make sense for your project.)
+
+The following example is derived from the [`mobility_tracked`](https://github.com/xopxe/oruga/tree/main/lib/mobility_tracked) module. It will subscribe to `/cmd_vel` topics of type `cmd_vel`.
 
 In the `my_module.h` file, create the module class:
 
@@ -166,7 +157,7 @@ static void cb(const void* msgin) {
 }
 ```
 
-Finally, in the setup method we initialize and register the subscription object:
+Finally, in the setup method, we initialize and register the subscription object:
 
 ```
 bool MyModule::setup() {
@@ -192,7 +183,7 @@ static std_msgs__msg__Int32 msg_tick;
 static publisher_descriptor my_topic;
 ```
 
-Then in the setup method we initialize and register the publisher object :
+Then, in the setup method, we initialize and register the publisher object :
 
 ```
   msg_tick.data = 0; // also initialize the topic message as needed
@@ -246,7 +237,7 @@ static void timer_handler (rcl_timer_t* timer, int64_t last_call_time) {
 }
 ```
 
-Finally, in the setup method initialize the timer descriptor object and register it.
+Finally, in the setup method, initialize the timer descriptor object and register it.
 
 ```
 bool MyModule::setup() {
@@ -296,7 +287,7 @@ Finally, configure and register the service descriptor:
 
 ### Subscribe to ROS state events
 
-You can respond to ROS state changes, for example by disabling and enabling hardware when micro-ros gets connected or diconnected. For that you must register an appropiate listener:
+You can respond to ROS state changes, for example, by disabling and enabling hardware when micro-ros get connected or disconnected. For that, you must register an appropriate listener:
 
 ```
 static void ros_state_cb(ros_states state) {
