@@ -32,6 +32,24 @@ We recommend adding `source ~/microros_ws/install/local_setup.bash` to your `.ba
 
 You can install PlatformIO inside VSCode following [this](https://docs.platformio.org/en/stable/integration/ide/vscode.html) tutorial.
 
+
+## Files
+
+The files in the micro_rosso library are:
+
+* `include/micro_rosso.h`, `src/micro_rosso.cpp`: library used to create and run modules.
+
+* `include/micro_rosso_config.h`: internal configuration for `micro_rosso`.
+
+* `include/logger.h`, `src/logger.cpp`: utility module pre-loaded by `micro_rosso` and used to send `/rosout` topics.
+
+* `include/sync_time.h`, `src/sync_time.cpp`: utility module for a service to synchronize the board's clock to the agent.
+
+* `include/ros_status.h`, `src/ros_status.cpp`: utility module that watches the connection status and can provide output, like lighting a LED when the board is connected to the agent..
+
+* `ticker.include/h`, `src/ticker.cpp`: utility module that creates a 1Hz timer and uses it to send to a topic regularly.
+
+
 ## Creating a project
 
 You can create an empty project using the IDE, selecting the framework, board, etc. Then you must edit the `platformio.ini` file to look something like this:
@@ -47,9 +65,31 @@ board_microros_transport = serial
 lib_deps = 
     https://github.com/xopxe/micro_rosso_platformio.git
 ```
-The `board_microros_transport`field specifies how the board will communicate with the agent. The various options will be discussed later.
 
 This project is developed on ESP32 boards but can be adapted to other Arduino-compatible boards. 
+
+A very minimal project is like this:
+
+```
+#include <Arduino.h>
+#include "micro_rosso.h"
+
+void setup() {
+  Serial.begin(115200);
+  set_microros_serial_transports(Serial);
+  if (!micro_rosso::setup( "oruga_rclc" )) {
+    D_println("FAIL micro_rosso.setup()");
+  }
+}
+
+void loop() {
+  micro_rosso::loop();
+}
+```
+
+The `board_microros_transport` field specifies how the board will communicate with the agent. This example uses the Serial transport, which is the first UART or the same USB link used to flash the board. You can [change the transport](https://github.com/micro-ROS/micro_ros_platformio?tab=readme-ov-file#transport-configuration). Each possible transport (serial, Wi-Fi, etc.) must be configured in your code in the setup() method before starting micro_rosso. 
+
+
 
 **Adding modules**
 
@@ -58,25 +98,8 @@ For your project modules, we recommend placing them into the /lib/ project folde
 For external modules, add the corresponding entry in [`lib_deps`](https://docs.platformio.org/en/latest/projectconf/sections/env/options/library/lib_deps.html).
 
 
-## Files
-
-* `micro_rosso.h`, `micro_rosso.cpp`: library used to create and run modules.
-
-* `micro_rosso_config.h`: internal configuration for `micro_rosso`.
-
-* `logger.h`, `logger.cpp`: utility module pre-loaded by `micro_rosso` and used to send `/rosout` topics.
-
-* `sync_time.h`, `sync_time.cpp`: utility module for a service to synchronize the board's clock to the agent.
-
-* `ros_status.h`, `ros_status.cpp`: utility module that watches the connection status and can provide output, like lighting a LED when the board is connected to the agent..
-
-* `ticker.h`, `ticker.cpp`: utility module that creates a 1Hz timer and uses it to regularly send to a topic.
-
-
-**FORM HERE**
-
-
 ## How to use modules
+
 First, we will show how to use a third-part module; later, we will describe how to create your own. 
 
 A module is imported as a standard PlatformIO library in any standard way. As an example, we will import the MPU6050 module from GitHub, adding the following entry to the platformio.ini` file:
