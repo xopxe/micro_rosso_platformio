@@ -143,6 +143,11 @@ static void timer_handler_report (rcl_timer_t* timer, int64_t last_call_time) {
 
 
 bool micro_rosso::setup( const char* rosname ) {
+  #if defined(DEBUG_CONSOLE)
+  //Must compile micro_rosso with correct DEBUG_CONSOLE in micro_rosso_config.h
+  D_SerialBegin(DEBUG_CONSOLE_BAUD, SERIAL_8N1, DEBUG_CONSOLE_PIN_RX, DEBUG_CONSOLE_PIN_TX);
+  #endif
+
   D_println("Setting up micro_rosso... ");
 
   reset_reason_0 = rtc_get_reset_reason(0);
