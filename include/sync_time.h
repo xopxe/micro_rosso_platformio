@@ -3,10 +3,11 @@
 
 #define SERVICE_SYNC_TIME "/sync_time"
 
-class SyncTime {
+class SyncTime
+{
 public:
   SyncTime();
   static bool setup();
 };
 
-#endif  // __time_sync_h
+#endif // __time_sync_h
