@@ -68,7 +68,7 @@ lib_deps =
 
 This project is developed on ESP32 boards but can be adapted to other Arduino-compatible boards. 
 
-A very minimal project is like this:
+A very minimal main.cpp looks like this:
 
 ```
 #include <Arduino.h>
@@ -77,7 +77,7 @@ A very minimal project is like this:
 void setup() {
   Serial.begin(115200);
   set_microros_serial_transports(Serial);
-  if (!micro_rosso::setup( "oruga_rclc" )) {
+  if (!micro_rosso::setup( "my_node_name" )) {
     D_println("FAIL micro_rosso.setup()");
   }
 }
