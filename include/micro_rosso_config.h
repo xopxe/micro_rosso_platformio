@@ -1,7 +1,19 @@
 #ifndef __micro_rosso_config_h
 #define __micro_rosso_config_h
 
-// #define ROS2_NODE_NAME "micro_rosso_rclc"
+/*
+If you want to change these values, pass the adecuate defines when building.
+For example, to enable serial debugging add the  following in the platfomrio.ini 
+file for the project that loads this library:
+
+build_flags =
+    -DDEBUG_CONSOLE=Serial1
+    -DDEBUG_CONSOLE_PIN_RX=10
+    -DDEBUG_CONSOLE_PIN_TX=9
+    -DDEBUG_CONSOLE_BAUD=115200
+
+*/
+
 
 /*
  Serial console used for debug output. If commented, no output is prdouced.
