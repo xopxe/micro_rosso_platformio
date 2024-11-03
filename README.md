@@ -8,11 +8,11 @@ For an example of an application that uses micro-rosso, see [oruga](https://gith
 
 To use micro-rosso, you need a working micro-ros environment and a PlatformIO environment.
 
-**micro-ros**
+First, you will need [ROS2 installed](https://docs.ros.org/en/dashing/Installation/Ubuntu-Install-Binary.html). We recommend adding `source /opt/ros/humble/setup.bash` to your `.bashrc` file (change the `humble` for whatever ROS2 version you installed).
 
-* [Install ROS2](https://docs.ros.org/en/dashing/Installation/Ubuntu-Install-Binary.html). We recommend adding `source /opt/ros/humble/setup.bash` to your `.bashrc` file (change the `humble` for whatever ROS2 version you installed).
+You have two ways install micro-ros, native build or a docker image.
 
-* Install micro_ros environment:
+**micro-ros native build**
   ```
   $ sudo apt install -y git cmake python3-pip python3-rosdep
   $ mkdir -p ~/microros_ws/src
@@ -26,7 +26,33 @@ To use micro-rosso, you need a working micro-ros environment and a PlatformIO en
   $ ros2 run micro_ros_setup build_agent.sh
   $ source ~/microros_ws/install/local_setup.bash
   ```
-We recommend adding `source ~/microros_ws/install/local_setup.bash` to your `.bashrc` file.
+We recommend adding `source ~/microros_ws/install/local_setup.bash` to your `.bashrc` file. Once micro-ros is installed, when using serial transport to communicate with the microcontroller you can run it as follows
+
+```
+$ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
+```
+When using wifi transport:
+
+```
+$ ros2 run micro_ros_agent micro_ros_agent udp4 --port 2024
+```
+...when using wifi transport.
+
+**micro-ros native build**
+
+Alternatively, you can run a micro-ros installation directly from a docker image. For example, when using serial transport to communicate with the microcontroller (change the `humble` for `jazzy` as needed):
+
+```
+docker run -it --rm -v /dev:/dev -v /dev/shm:/dev/shm --privileged --net=host microros/micro-ros-agent:humble serial --dev /dev/ttyUSB0 -b 115200
+```
+
+When using wifi transport:
+
+```
+docker run -it --rm -v /dev:/dev -v /dev/shm:/dev/shm --privileged --net=host microros/micro-ros-agent:humble udp4 --port 2024
+```
+
+
 
 **PlatformIO environment**
 
@@ -52,7 +78,7 @@ The files in the micro_rosso library are:
 
 ## Creating a project
 
-You can create an empty project using the IDE, selecting the framework, board, etc. Then you must edit the `platformio.ini` file to look something like this:
+You can create an empty project using the IDE by selecting the framework, board, etc. Then you must edit the `platformio.ini` file to look something like this:
 
 ```
 [env:pico32]
@@ -93,14 +119,14 @@ The `board_microros_transport` field specifies how the board will communicate wi
 
 **Adding modules**
 
-For your project modules, we recommend placing them into the /lib/ project folder.
+We recommend placing your project modules in the /lib/ project folder.
 
 For external modules, add the corresponding entry in [`lib_deps`](https://docs.platformio.org/en/latest/projectconf/sections/env/options/library/lib_deps.html).
 
 
 ## How to use modules
 
-First, we will show how to use a third-part module; later, we will describe how to create your own. 
+First, we will show how to use a third-party module; later, we will describe how to create your own. 
 
 A module is imported as a standard PlatformIO library in any standard way. As an example, we will import the MPU6050 module from GitHub, adding the following entry to the platformio.ini` file:
 
@@ -132,18 +158,27 @@ void setup() {
 
 Check the `setup()` call to see what optional parameter you can pass to it, such as the I2C channel, topic names, etc.
 
-Usually, modules' setup method returns `false` if something fails. `D_print` and `D_println` are macros that print to a debug console (see `DEBUG_CONSOLE` macros in `micro_rosso_config.h` to see if it is enabled and where it goes to).
+Usually, the modules' setup method returns `false` if something fails. `D_print` and `D_println` are macros that print to a debug console. You can configure the serial debug consoles by passing build flags from your project's `platformio.ini`. For example:
+
+```
+build_flags =
+    -DDEBUG_CONSOLE=Serial1
+    -DDEBUG_CONSOLE_PIN_RX=10
+    -DDEBUG_CONSOLE_PIN_TX=9
+    -DDEBUG_CONSOLE_BAUD=115200
+
+```
 
 
 ## How to write a module
 
-A micro\_rosso module is a mostly static object that provides a setup method where it registers ros2 resources using `micro_rosso.h`. It then uses micro_ros_platformio and other modules to implement its own functionality.
+A micro\_rosso module is a mostly static object that provides a setup method where it registers ros2 resources using `micro_rosso.h`. It then uses micro_ros_platformio and other modules to implement its functionality.
 
 Things a module can do:
 
 ### Subscribe to topics
 
-You have various options where to place libraries in your project:
+You have various options for where to place libraries in your project:
 
 * Both .h and .cpp files in the src/ directory. (quick and dirty)
 * The .h in the include/ folder, the .cpp in src/ (good for when you are writing a library you will publish)
@@ -159,7 +194,7 @@ class MyModule {
 }
 ```
 
-In `my_module.cpp`, create and register the subscription. We will create a static object to store the messages when they arrive, and a subscription object:
+In `my_module.cpp`, create and register the subscription. We will create a static object to store the messages when they arrive and a subscription object:
 
 ```
 static geometry_msgs__msg__Twist msg_twist;
@@ -170,11 +205,11 @@ Then, define a method to attend to the messages when they arrive:
 
 ```
 static void cb(const void* msgin) {
-  // we can read the message from the global message object 
+  // We can read the message from the global message object 
   D_println(msg_twist.linear.x);
   
-  // or we can retrieve the object from the call, useful when 
-  // sharing the callback between topics:
+  // or we can retrieve the object from the call, which is
+  // useful when sharing the callback between topics:
   // const geometry_msgs__msg__Twist* msg = 
   //   (const geometry_msgs__msg__Twist*)msgin;
 }
@@ -226,7 +261,7 @@ The topic then can be published from methods, timers, event handlers, etc., as f
 
 ### Use and register timers
 
-`micro_rosso` provides two timers by default, `micro_rosso::timer_control` at 50Hz (20ms period) and `micro_rosso::timer_report` at 5Hz (200ms period). To use a timer create a callback function and add it to the timer's callbacks vector:
+`micro_rosso` provides two timers by default, `micro_rosso::timer_control` at 50Hz (20ms period) and `micro_rosso::timer_report` at 5Hz (200ms period). To use a timer, create a callback function and add it to the timer's callbacks vector:
 
 ```
 void report_cb(int64_t last_call_time) {
@@ -240,7 +275,7 @@ bool setup() {
 }
 ```
 
-It is possible to create new timers. For an example, see the `ticker` module, which creates and provides a 1Hz timer.For this, first instantiate a timer descriptor. You can do it in the class definition if you want to make it useable by other modules.
+It is possible to create new timers. For an example, see the `ticker` module, which creates and provides a 1Hz timer. To do this, first instantiate a timer descriptor. If you want to make it usable by other modules, you can do it in the class definition.
 
 ```
 class MyModule {
@@ -274,7 +309,7 @@ bool MyModule::setup() {
 
 ### Serve services
 
-To create and announce a service, see the example in the `sync_time` module. First, create a service descriptor and the request and response objects:
+See the example in the `sync_time` module to create and announce a service. First, create a service descriptor and the request and response objects:
 
 ```
 static service_descriptor my_service;
@@ -344,8 +379,6 @@ bool MyModule::setup() {
 ## Example commands
 
 ```
-$ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
-$ ros2 run micro_ros_agent micro_ros_agent udp4 --port 2024
 $ picocom --baud 115200 /dev/ttyUSB1
 $ ros2 topic list
 $ ros2 topic echo "/imu/raw"
