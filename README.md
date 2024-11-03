@@ -12,52 +12,53 @@ First, you will need [ROS2 installed](https://docs.ros.org/en/dashing/Installati
 
 You have two ways install micro-ros, native build or a docker image.
 
-**micro-ros native build**
+### micro-ros native build
+
+  ```sh
+  sudo apt install -y git cmake python3-pip python3-rosdep
+  mkdir -p ~/microros_ws/src
+  cd ~/microros_ws
+  git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup
+  sudo apt update && rosdep update
+  rosdep install --from-paths src --ignore-src -y
+  colcon build
+  source install/local_setup.bash
+  ros2 run micro_ros_setup create_agent_ws.sh
+  ros2 run micro_ros_setup build_agent.sh
+  source ~/microros_ws/install/local_setup.bash
   ```
-  $ sudo apt install -y git cmake python3-pip python3-rosdep
-  $ mkdir -p ~/microros_ws/src
-  $ cd ~/microros_ws
-  $ git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup
-  $ sudo apt update && rosdep update
-  $ rosdep install --from-paths src --ignore-src -y
-  $ colcon build
-  $ source install/local_setup.bash
-  $ ros2 run micro_ros_setup create_agent_ws.sh
-  $ ros2 run micro_ros_setup build_agent.sh
-  $ source ~/microros_ws/install/local_setup.bash
-  ```
+
 We recommend adding `source ~/microros_ws/install/local_setup.bash` to your `.bashrc` file. Once micro-ros is installed, when using serial transport to communicate with the microcontroller you can run it as follows
 
+```sh
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
 ```
-$ ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
-```
+
 When using wifi transport:
 
+```sh
+ros2 run micro_ros_agent micro_ros_agent udp4 --port 2024
 ```
-$ ros2 run micro_ros_agent micro_ros_agent udp4 --port 2024
-```
+
 ...when using wifi transport.
 
-**micro-ros native build**
+### micro-ros from a snap
 
 Alternatively, you can run a micro-ros installation directly from a docker image. For example, when using serial transport to communicate with the microcontroller (change the `humble` for `jazzy` as needed):
 
-```
+```sh
 docker run -it --rm -v /dev:/dev -v /dev/shm:/dev/shm --privileged --net=host microros/micro-ros-agent:humble serial --dev /dev/ttyUSB0 -b 115200
 ```
 
 When using wifi transport:
 
-```
+```sh
 docker run -it --rm -v /dev:/dev -v /dev/shm:/dev/shm --privileged --net=host microros/micro-ros-agent:humble udp4 --port 2024
 ```
 
-
-
-**PlatformIO environment**
+### PlatformIO environment
 
 You can install PlatformIO inside VSCode following [this](https://docs.platformio.org/en/stable/integration/ide/vscode.html) tutorial.
-
 
 ## Files
 
@@ -75,12 +76,11 @@ The files in the micro_rosso library are:
 
 * `ticker.include/h`, `src/ticker.cpp`: utility module that creates a 1Hz timer and uses it to send to a topic regularly.
 
-
 ## Creating a project
 
 You can create an empty project using the IDE by selecting the framework, board, etc. Then you must edit the `platformio.ini` file to look something like this:
 
-```
+```ini
 [env:pico32]
 platform = espressif32
 board = pico32 ; or whatever esp32 board you have
@@ -92,11 +92,11 @@ lib_deps =
     https://github.com/xopxe/micro_rosso_platformio.git
 ```
 
-This project is developed on ESP32 boards but can be adapted to other Arduino-compatible boards. 
+This project is developed on ESP32 boards but can be adapted to other Arduino-compatible boards.
 
 A very minimal main.cpp looks like this:
 
-```
+```cpp
 #include <Arduino.h>
 #include "micro_rosso.h"
 
@@ -113,24 +113,21 @@ void loop() {
 }
 ```
 
-The `board_microros_transport` field specifies how the board will communicate with the agent. This example uses the Serial transport, which is the first UART or the same USB link used to flash the board. You can [change the transport](https://github.com/micro-ROS/micro_ros_platformio?tab=readme-ov-file#transport-configuration). Each possible transport (serial, Wi-Fi, etc.) must be configured in your code in the setup() method before starting micro_rosso. 
+The `board_microros_transport` field specifies how the board will communicate with the agent. This example uses the Serial transport, which is the first UART or the same USB link used to flash the board. You can [change the transport](https://github.com/micro-ROS/micro_ros_platformio?tab=readme-ov-file#transport-configuration). Each possible transport (serial, Wi-Fi, etc.) must be configured in your code in the setup() method before starting micro_rosso.
 
-
-
-**Adding modules**
+### Adding modules
 
 We recommend placing your project modules in the /lib/ project folder.
 
 For external modules, add the corresponding entry in [`lib_deps`](https://docs.platformio.org/en/latest/projectconf/sections/env/options/library/lib_deps.html).
 
-
 ## How to use modules
 
-First, we will show how to use a third-party module; later, we will describe how to create your own. 
+First, we will show how to use a third-party module; later, we will describe how to create your own.
 
 A module is imported as a standard PlatformIO library in any standard way. As an example, we will import the MPU6050 module from GitHub, adding the following entry to the platformio.ini` file:
 
-```
+```ini
 lib_deps = 
     https://github.com/xopxe/micro_rosso_platformio.git
     https://github.com/xopxe/micro_rosso_mpu6050.git
@@ -138,16 +135,16 @@ lib_deps =
 
 /TIP: include from a local folder to reduce rebuilding time/
 
-To start a module, you must include and, if needed, configure it in your `main.cpp`. Following mpu6050 example, add the following somewhere near the top and after the `#include "micro_rosso.h"`: 
+To start a module, you must include and, if needed, configure it in your `main.cpp`. Following mpu6050 example, add the following somewhere near the top and after the `#include "micro_rosso.h"`:
 
-```
+```cpp
 #include "micro_rosso_mpu6050.h"
 ImuMPU6050 imu;
 ```
 
 Then, call the initialization in the setup function:
 
-```
+```cpp
 void setup() {
   ...
   if (!imu.setup()) {
@@ -160,7 +157,7 @@ Check the `setup()` call to see what optional parameter you can pass to it, such
 
 Usually, the modules' setup method returns `false` if something fails. `D_print` and `D_println` are macros that print to a debug console. You can configure the serial debug consoles by passing build flags from your project's `platformio.ini`. For example:
 
-```
+```ini
 build_flags =
     -DDEBUG_CONSOLE=Serial1
     -DDEBUG_CONSOLE_PIN_RX=10
@@ -168,7 +165,6 @@ build_flags =
     -DDEBUG_CONSOLE_BAUD=115200
 
 ```
-
 
 ## How to write a module
 
@@ -188,7 +184,7 @@ The following example is derived from the [`mobility_tracked`](https://github.co
 
 In the `my_module.h` file, create the module class:
 
-```
+```h
 class MyModule {
   static bool setup();
 }
@@ -196,14 +192,14 @@ class MyModule {
 
 In `my_module.cpp`, create and register the subscription. We will create a static object to store the messages when they arrive and a subscription object:
 
-```
+```cpp
 static geometry_msgs__msg__Twist msg_twist;
 static subscriber_descriptor my_subscription; 
 ```
 
 Then, define a method to attend to the messages when they arrive:
 
-```
+```cpp
 static void cb(const void* msgin) {
   // We can read the message from the global message object 
   D_println(msg_twist.linear.x);
@@ -217,7 +213,7 @@ static void cb(const void* msgin) {
 
 Finally, in the setup method, we initialize and register the subscription object:
 
-```
+```cpp
 bool MyModule::setup() {
   my_subscription.type_support = 
     ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist);
@@ -236,14 +232,14 @@ The following example is derived from the `ticker` module. It will publish to `/
 
 In `my_module.cpp` create and register the publisher. We will create a static object to store the message to be sent and a publisher object:
 
-```
+```cpp
 static std_msgs__msg__Int32 msg_tick;
 static publisher_descriptor my_topic;
 ```
 
 Then, in the setup method, we initialize and register the publisher object :
 
-```
+```cpp
   msg_tick.data = 0; // also initialize the topic message as needed
   my_topic.qos = QOS_DEFAULT; // can also be QOS_BEST_EFFORT
   my_topic.type_support = 
@@ -254,7 +250,7 @@ Then, in the setup method, we initialize and register the publisher object :
 
 The topic then can be published from methods, timers, event handlers, etc., as follows:
 
-```
+```cpp
   rcl_publish(&my_topic.publisher, &msg_tick, NULL);
   msg_tick.data++;
 ```
@@ -263,7 +259,7 @@ The topic then can be published from methods, timers, event handlers, etc., as f
 
 `micro_rosso` provides two timers by default, `micro_rosso::timer_control` at 50Hz (20ms period) and `micro_rosso::timer_report` at 5Hz (200ms period). To use a timer, create a callback function and add it to the timer's callbacks vector:
 
-```
+```cpp
 void report_cb(int64_t last_call_time) {
   D_println("called at 5Hz!");
 }
@@ -275,9 +271,11 @@ bool setup() {
 }
 ```
 
+The `last_call_time` parameter is the time since last time the timer triggered, in nanoseconds.
+
 It is possible to create new timers. For an example, see the `ticker` module, which creates and provides a 1Hz timer. To do this, first instantiate a timer descriptor. If you want to make it usable by other modules, you can do it in the class definition.
 
-```
+```cpp
 class MyModule {
   static bool setup();
   static timer_descriptor my_timer;
@@ -286,7 +284,7 @@ class MyModule {
 
 Create a timer handler function in the `.cpp` file. The timer descriptor has a callback vector property, so a basic handler will have to call all the registered callbacks:
 
-```
+```cpp
 static void timer_handler (rcl_timer_t* timer, int64_t last_call_time) {
   for (int i = 0; i < Ticker::my_timer.callbacks.size(); i++) {
     Ticker::my_timer.callbacks[i](last_call_time);
@@ -297,7 +295,7 @@ static void timer_handler (rcl_timer_t* timer, int64_t last_call_time) {
 
 Finally, in the setup method, initialize the timer descriptor object and register it.
 
-```
+```cpp
 bool MyModule::setup() {
   ...
   Ticker::timer_tick.timeout_ns = RCL_MS_TO_NS(1000); // 1 sec
@@ -311,7 +309,7 @@ bool MyModule::setup() {
 
 See the example in the `sync_time` module to create and announce a service. First, create a service descriptor and the request and response objects:
 
-```
+```cpp
 static service_descriptor my_service;
 std_srvs__srv__Trigger_Request req_service;
 std_srvs__srv__Trigger_Response res_service;
@@ -319,7 +317,7 @@ std_srvs__srv__Trigger_Response res_service;
 
 Then, create the callback function for the service:
 
-```
+```cpp
 static void service_cb(const void* req, void* res) {
   // request and response can be cast from the call:
   // std_srvs__srv__Trigger_Response* res_in = 
@@ -331,7 +329,7 @@ static void service_cb(const void* req, void* res) {
 
 Finally, configure and register the service descriptor:
 
-```
+```cpp
   my_service.qos = QOS_DEFAULT; // can also be QOS_BEST_EFFORT
   my_service.type_support =
     ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, Trigger);
@@ -347,7 +345,7 @@ Finally, configure and register the service descriptor:
 
 You can respond to ROS state changes, for example, by disabling and enabling hardware when micro-ros get connected or disconnected. For that, you must register an appropriate listener:
 
-```
+```cpp
 static void ros_state_cb(ros_states state) {
   switch (state) {
     case WAITING_AGENT:      // the client is waiting the agent
@@ -370,31 +368,24 @@ bool MyModule::setup() {
   return true;
 }
 ```
- 
-
 
 ### TODO consume services
 
-
 ## Example commands
 
+```sh
+picocom --baud 115200 /dev/ttyUSB1
+ros2 topic list
+ros2 topic echo "/imu/raw"
+ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.1, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
+ros2 service call /sync_time std_srvs/srv/Trigger "{}"
+ros2 topic echo /rosout --field msg
 ```
-$ picocom --baud 115200 /dev/ttyUSB1
-$ ros2 topic list
-$ ros2 topic echo "/imu/raw"
-$ ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.1, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
-$ ros2 service call /sync_time std_srvs/srv/Trigger "{}"
-$ ros2 topic echo /rosout --field msg
-```
-
-
 
 ## Authors and acknowledgment
 
-jvisca@fing.edu.uy - [Grupo MINA](https://www.fing.edu.uy/inco/grupos/mina/), Facultad de Ingeniería - Udelar, 2024
+<jvisca@fing.edu.uy> - [Grupo MINA](https://www.fing.edu.uy/inco/grupos/mina/), Facultad de Ingeniería - Udelar, 2024
 
 ## License
 
 MIT
-
-
