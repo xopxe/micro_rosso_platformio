@@ -299,8 +299,11 @@ static bool create_entities()
     timer_descriptor *t = micro_rosso::timers[i];
     D_print("+timer (ms): ");
     D_println(t->timeout_ns / 1000000);
-    RCCHECK(rclc_timer_init_default(
-        &(t->timer), &support, t->timeout_ns, t->timer_handler));
+    //deprecated:
+    //RCCHECK(rclc_timer_init_default(
+    //    &(t->timer), &support, t->timeout_ns, t->timer_handler));
+    RCCHECK(rclc_timer_init_default2(
+        &(t->timer), &support, t->timeout_ns, t->timer_handler, true));
   }
 
   // create services

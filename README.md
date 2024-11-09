@@ -28,7 +28,7 @@ Then you have to install micro-ros. There are two ways, native build (harder) or
   source ~/microros_ws/install/local_setup.bash
   ```
 
-We recommend adding `source ~/microros_ws/install/local_setup.bash` to your `.bashrc` file. Once micro-ros is installed, when using serial transport to communicate with the microcontroller you can run it as follows
+Once micro-ros is installed, when using serial transport to communicate with the microcontroller you can run it as follows
 
 ```sh
 ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
