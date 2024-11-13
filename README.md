@@ -2,7 +2,7 @@
 
 This is a modular system for micro-ros under PlatformIO. It allows you to write modules that can interact with ROS2 sending and receiving topics, publishing services, and so on.
 
-For an example of an application that uses micro-rosso, see [oruga](https://github.com/xopxe/oruga), a tracked robot. If you see its [platformio.ini](https://github.com/xopxe/oruga/blob/main/platformio.ini) file, you'll see that it's an ESP32 project that uses Arduino framework, uses ROS2 jazzy, and depends on [micro-rosso](https://github.com/xopxe/micro_rosso_platformio) library. It provides its functionality in modules, such as the [mobility system](https://github.com/xopxe/oruga/tree/main/lib/mobility_tracked). It also depends on external modules, such as [mpu6050](https://github.com/xopxe/micro_rosso_mpu6050.) IMU.
+For an example of an application that uses micro-rosso, see [oruga](https://github.com/xopxe/oruga), a tracked robot. In its [platformio.ini](https://github.com/xopxe/oruga/blob/main/platformio.ini) file you'll see that it's an ESP32 project that uses Arduino framework, uses ROS2 jazzy, and depends on [micro-rosso](https://github.com/xopxe/micro_rosso_platformio) library. It provides its functionality in modules, such as the [mobility system](https://github.com/xopxe/oruga/tree/main/lib/mobility_tracked). It also depends on external modules, such as [mpu6050](https://github.com/xopxe/micro_rosso_mpu6050) IMU.
 
 ## Install
 
@@ -10,7 +10,7 @@ To use micro-rosso, you need a working micro-ros environment and a PlatformIO en
 
 First, you will need [ROS2 installed](https://docs.ros.org/en/dashing/Installation/Ubuntu-Install-Binary.html).
 
-Then you have to install micro-ros. There are two ways, native build (harder) or a docker image (easier).
+Then you have to install micro-ros. There are two ways: native build (harder) or a docker image (easier).
 
 ### micro-ros native build
 
