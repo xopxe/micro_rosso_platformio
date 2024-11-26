@@ -12,23 +12,39 @@ First, you will need [ROS2 installed](https://docs.ros.org/en/dashing/Installati
 
 Then you have to install micro-ros. There are two ways: native build (harder) or a docker image (easier).
 
+### micro-ros from a snap
+
+You can run a micro-ros installation directly from a docker image. For example, when using serial transport to communicate with the microcontroller (change the `humble` for `jazzy` as needed):
+
+```sh
+docker run -it --rm --device=/dev/ttyUSB_ESP32 --net=host microros/micro-ros-agent:jazzy serial --dev /dev/ttyUSB_ESP32 -b 115200
+```
+
+When using wifi transport:
+
+```sh
+docker run -it --rm --net=host microros/micro-ros-agent:humble udp4 --port 2024
+```
+
 ### micro-ros native build
 
-  ```sh
-  sudo apt install -y git cmake python3-pip python3-rosdep
-  mkdir -p ~/microros_ws/src
-  cd ~/microros_ws
-  git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup
-  sudo apt update && rosdep update
-  rosdep install --from-paths src --ignore-src -y
-  colcon build
-  source install/local_setup.bash
-  ros2 run micro_ros_setup create_agent_ws.sh
-  ros2 run micro_ros_setup build_agent.sh
-  source ~/microros_ws/install/local_setup.bash
-  ```
+You can also build the micro-ros environment yourself.
 
-Once micro-ros is installed, when using serial transport to communicate with the microcontroller you can run it as follows
+```sh
+sudo apt install -y git cmake python3-pip python3-rosdep
+mkdir -p ~/microros_ws/src
+cd ~/microros_ws
+git clone -b $ROS_DISTRO https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup
+sudo apt update && rosdep update
+rosdep install --from-paths src --ignore-src -y
+colcon build
+source install/local_setup.bash
+ros2 run micro_ros_setup create_agent_ws.sh
+ros2 run micro_ros_setup build_agent.sh
+source ~/microros_ws/install/local_setup.bash
+```
+
+Once micro-ros is installed, when using serial transport to communicate with the microcontroller you can run it as follows:
 
 ```sh
 ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
@@ -38,22 +54,6 @@ When using wifi transport:
 
 ```sh
 ros2 run micro_ros_agent micro_ros_agent udp4 --port 2024
-```
-
-...when using wifi transport.
-
-### ...or micro-ros from a snap
-
-Alternatively, you can run a micro-ros installation directly from a docker image. For example, when using serial transport to communicate with the microcontroller (change the `humble` for `jazzy` as needed):
-
-```sh
-docker run -it --rm -v /dev:/dev -v /dev/shm:/dev/shm --privileged --net=host microros/micro-ros-agent:humble serial --dev /dev/ttyUSB0 -b 115200
-```
-
-When using wifi transport:
-
-```sh
-docker run -it --rm -v /dev:/dev -v /dev/shm:/dev/shm --privileged --net=host microros/micro-ros-agent:humble udp4 --port 2024
 ```
 
 ### PlatformIO environment
