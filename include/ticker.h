@@ -2,13 +2,12 @@
 #define __ticker_h
 
 #define TIMER_TICK_MS 1000 // 1Hz
-#define TICKER_TOPIC_TICK "/tick"
 
 class Ticker
 {
 public:
   Ticker();
-  static bool setup();
+  static bool setup(const char *topic_name = "/tick");
 
   static timer_descriptor timer_tick;
 };

@@ -228,7 +228,7 @@ bool MyModule::setup() {
 
 ### Publish topics
 
-The following example is derived from the `ticker` module. It will publish to `/tick` topics of type `int32`.
+The following example is derived from the `ticker` module. It will publish (by default)`/tick` topics, of type `int32`.
 
 In `my_module.cpp` create and register the publisher. We will create a static object to store the message to be sent and a publisher object:
 
@@ -370,6 +370,8 @@ bool MyModule::setup() {
 ```
 
 ### TODO consume services
+
+### TODO parameter server
 
 ## Example commands
 

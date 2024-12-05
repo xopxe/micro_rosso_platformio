@@ -11,28 +11,38 @@ SyncTime sync_time;
 #include "ros_status.h"
 RosStatus ros_status;
 
-void setup() {
+void setup()
+{
   D_println("Booting...");
 
-  if (!micro_rosso::setup()) {
+  D_print("Setting up transport... ");
+  Serial.begin(115200);
+  set_microros_serial_transports(Serial);
+
+  if (!micro_rosso::setup("my_node_name"))
+  {
     D_println("FAIL micro_rosso.setup()");
   }
 
-  if (!ticker.setup()) {
+  if (!ticker.setup())
+  {
     D_println("FAIL ticker.setup()");
   };
-  
-  if (!sync_time.setup()) {
+
+  if (!sync_time.setup())
+  {
     D_println("FAIL sync_time.setup()");
   };
 
-  if (!ros_status.setup()) {
+  if (!ros_status.setup())
+  {
     D_println("FAIL ros_status.setup()");
   };
 
   D_println("Boot completed.");
 }
 
-void loop() {
+void loop()
+{
   micro_rosso::loop();
 }

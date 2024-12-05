@@ -7,7 +7,7 @@ class Logger
 {
 public:
   Logger();
-  static bool setup(const char *topic = "/rosout");
+  static bool setup(const char *topic_name = "/rosout");
 
   static void log(const char *s,
                   const char *file = "",

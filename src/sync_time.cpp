@@ -32,7 +32,7 @@ static void service_sync_time_cb(const void *req, void *res)
   res_sync_time.success = micro_rosso::time_sync();
 }
 
-bool SyncTime::setup()
+bool SyncTime::setup(const char *service_name)
 {
   D_println("init time syncer");
 
@@ -43,7 +43,7 @@ bool SyncTime::setup()
   sdescriptor_sync_time.qos = QOS_DEFAULT;
   sdescriptor_sync_time.type_support =
       ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, Trigger);
-  sdescriptor_sync_time.service_name = SERVICE_SYNC_TIME;
+  sdescriptor_sync_time.service_name = service_name;
   sdescriptor_sync_time.request = &req_sync_time;
   sdescriptor_sync_time.response = &res_sync_time;
   sdescriptor_sync_time.callback = service_sync_time_cb;

@@ -45,7 +45,7 @@ static void timer_handler_tick(rcl_timer_t *timer, int64_t last_call_time)
   return;
 }
 
-bool Ticker::setup()
+bool Ticker::setup(const char *topic_name)
 {
   D_println("setup: ticker");
 
@@ -53,7 +53,7 @@ bool Ticker::setup()
   pdescriptor_tick.type_support =
       (rosidl_message_type_support_t *)ROSIDL_GET_MSG_TYPE_SUPPORT(
           std_msgs, msg, Int32);
-  pdescriptor_tick.topic_name = TICKER_TOPIC_TICK;
+  pdescriptor_tick.topic_name = topic_name;
   micro_rosso::publishers.push_back(&pdescriptor_tick);
 
   // create a new timer
