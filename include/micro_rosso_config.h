@@ -3,7 +3,7 @@
 
 /*
 If you want to change these values, pass the adecuate defines when building.
-For example, to enable serial debugging add the  following in the platfomrio.ini 
+For example, to enable serial debugging add the  following in the platfomrio.ini
 file for the project that loads this library:
 
 build_flags =
@@ -13,7 +13,6 @@ build_flags =
     -DDEBUG_CONSOLE_BAUD=115200
 
 */
-
 
 /*
  Serial console used for debug output. If commented, no output is prdouced.
@@ -41,6 +40,24 @@ build_flags =
 #endif
 #if !defined(TIMER_REPORT_MS)
 #define TIMER_REPORT_MS 200 // 5Hz
+#endif
+
+/*
+ Set to true to enable the parameter server
+*/
+#if !defined(ROS_PARAMETER_SERVER)
+#define ROS_PARAMETER_SERVER false
+#endif
+/*
+ The configuration for the parameter server (used if enabled)
+*/
+#if ROS_PARAMETER_SERVER
+#include <rclc_parameter/rclc_parameter.h>
+static const rclc_parameter_options_t parameter_options = {
+    .notify_changed_over_dds = true,
+    .max_params = 4,
+    .allow_undeclared_parameters = true,
+    .low_mem_mode = false};
 #endif
 
 #endif // __micro_rosso_config_h

@@ -95,6 +95,9 @@ public:
   static bool setup(const char *ros2_node_name);
 
   static Logger logger;
+  #if ROS_PARAMETER_SERVER
+  static rclc_parameter_server_t param_server;
+  #endif
 
   static std::vector<publisher_descriptor *> publishers;
   static std::vector<subscriber_descriptor *> subscribers;
@@ -102,6 +105,10 @@ public:
   static std::vector<client_descriptor *> clients;
   static std::vector<timer_descriptor *> timers;
   static std::vector<void (*)(ros_states)> ros_state_listeners;
+  #if ROS_PARAMETER_SERVER
+  static std::vector<void (*) (const Parameter*, const Parameter*)>parameter_change_listeners;
+  #endif
+
 
   static timer_descriptor timer_control;
   static timer_descriptor timer_report;
