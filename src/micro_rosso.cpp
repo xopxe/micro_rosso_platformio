@@ -17,12 +17,19 @@
 static RESET_REASON reset_reason_0;
 static RESET_REASON reset_reason_1;
 
+#if ROS_PARAMETER_SERVER
+rclc_parameter_server_t micro_rosso::param_server;
+#endif
+
 std::vector<publisher_descriptor *> micro_rosso::publishers;
 std::vector<subscriber_descriptor *> micro_rosso::subscribers;
 std::vector<service_descriptor *> micro_rosso::services;
 std::vector<client_descriptor *> micro_rosso::clients;
 std::vector<timer_descriptor *> micro_rosso::timers;
 std::vector<void (*)(ros_states)> micro_rosso::ros_state_listeners;
+#if ROS_PARAMETER_SERVER
+std::vector<void (*) (const Parameter*, const Parameter*)> micro_rosso::parameter_change_listeners;
+#endif
 
 timer_descriptor micro_rosso::timer_control;
 timer_descriptor micro_rosso::timer_report;
@@ -139,6 +146,9 @@ static void shrink_to_fit()
     timer_descriptor *t = micro_rosso::timers[i];
     t->callbacks.shrink_to_fit();
   }
+  #if ROS_PARAMETER_SERVER
+  micro_rosso::parameter_change_listeners.shrink_to_fit();
+  #endif
 }
 
 static void timer_handler_control(rcl_timer_t *timer, int64_t last_call_time)
@@ -158,6 +168,58 @@ static void timer_handler_report(rcl_timer_t *timer, int64_t last_call_time)
   }
   return;
 }
+
+#if ROS_PARAMETER_SERVER
+static void print_parameter_desc(const Parameter *p)
+{
+  if (p == NULL)
+  {
+    D_print("NULL");
+  }
+  else
+  {
+    D_print(p->name.data);
+    switch (p->value.type)
+    {
+    case RCLC_PARAMETER_BOOL:
+      D_print("=(bool)");
+      D_print(p->value.bool_value);
+      break;
+    case RCLC_PARAMETER_INT:
+      D_print("=(int)");
+      D_print(p->value.integer_value);
+      break;
+    case RCLC_PARAMETER_DOUBLE:
+      D_print("=(double)");
+      D_print(p->value.double_value);
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+bool on_parameter_changed(const Parameter *old_param, const Parameter *new_param, void *context)
+{
+  (void)context;
+  if (old_param == NULL && new_param == NULL)
+  {
+    D_println("ERROR: on_parameter_changed, both parameters are NULL");
+    return false;
+  }
+  D_print("parameter change: ");
+  print_parameter_desc(old_param);
+  D_print(" -> ");
+  print_parameter_desc(new_param);
+  D_println(); 
+
+  for (int i = 0; i < micro_rosso::parameter_change_listeners.size(); i++)
+  {
+    micro_rosso::parameter_change_listeners[i](old_param, new_param);
+  }
+  return true;
+}
+#endif
 
 bool micro_rosso::setup(const char *rosname)
 {
@@ -241,7 +303,8 @@ static const char *reset_reason_string(const RESET_REASON reason)
 // - UCLIENT_MAX_SESSION_CONNECTION_ATTEMPTS=3
 static bool create_entities()
 {
-  D_println("Creating ROS2 entities... ");
+  D_print("Creating ROS2 entities for node: ");
+  D_println(ros2_node_name);
 
   shrink_to_fit();
   D_print("publishers: ");
@@ -254,6 +317,10 @@ static bool create_entities()
   D_println(micro_rosso::clients.size());
   D_print("state listeners: ");
   D_println(micro_rosso::ros_state_listeners.size());
+  #if ROS_PARAMETER_SERVER
+  D_print("parameter change  listeners: ");
+  D_println(micro_rosso::parameter_change_listeners.size());
+  #endif
 
   allocator = rcl_get_default_allocator();
 
@@ -299,9 +366,9 @@ static bool create_entities()
     timer_descriptor *t = micro_rosso::timers[i];
     D_print("+timer (ms): ");
     D_println(t->timeout_ns / 1000000);
-    //deprecated:
-    //RCCHECK(rclc_timer_init_default(
-    //    &(t->timer), &support, t->timeout_ns, t->timer_handler));
+    // deprecated:
+    // RCCHECK(rclc_timer_init_default(
+    //     &(t->timer), &support, t->timeout_ns, t->timer_handler));
     RCCHECK(rclc_timer_init_default2(
         &(t->timer), &support, t->timeout_ns, t->timer_handler, true));
   }
@@ -309,7 +376,7 @@ static bool create_entities()
   // create services
   if (micro_rosso::services.size() > 1)
   {
-    D_println("WARNING: verify DRMW_UXRCE_MAX_SERVICES in colcon.meta ");
+    D_println("WARNING: services, verify DRMW_UXRCE_MAX_SERVICES in colcon.meta ");
   }
   for (int i = 0; i < micro_rosso::services.size(); i++)
   {
@@ -330,7 +397,7 @@ static bool create_entities()
     }
   }
 
-  // create servce clients
+  // create service clients
   for (int i = 0; i < micro_rosso::clients.size(); i++)
   {
     client_descriptor *c = micro_rosso::clients[i];
@@ -350,6 +417,13 @@ static bool create_entities()
     }
   }
 
+#if ROS_PARAMETER_SERVER
+  D_println("WARNING: parameter_server, verify DRMW_UXRCE_MAX_SERVICES in colcon.meta ");
+  RCCHECK(rclc_parameter_server_init_with_option(
+      &micro_rosso::param_server, &node, &parameter_options));
+  // RCCHECK(rclc_parameter_server_init_default(&param_server, &node));
+#endif
+
   // create executor
   executor = rclc_executor_get_zero_initialized_executor();
   size_t n_executors =
@@ -357,6 +431,11 @@ static bool create_entities()
       micro_rosso::services.size() +
       micro_rosso::clients.size() +
       micro_rosso::subscribers.size();
+
+#if ROS_PARAMETER_SERVER
+  n_executors += RCLC_EXECUTOR_PARAMETER_SERVER_HANDLES;
+  // RCLC_EXECUTOR_PARAMETER_SERVER_HANDLES ?
+#endif
 
   D_print("Allocating executors: ");
   D_println(n_executors);
@@ -388,6 +467,11 @@ static bool create_entities()
     RCCHECK(rclc_executor_add_client(
         &executor, &(c->client), c->response, c->callback));
   }
+
+#if ROS_PARAMETER_SERVER
+  rclc_executor_add_parameter_server(
+      &executor, &micro_rosso::param_server, on_parameter_changed);
+#endif
 
   D_println("...Done.");
   delay(500);
@@ -455,6 +539,10 @@ static void destroy_entities()
   RCNOCHECK(rclc_executor_fini(&executor));
   RCNOCHECK(rcl_node_fini(&node));
   RCNOCHECK(rclc_support_fini(&support));
+
+#if ROS_PARAMETER_SERVER
+  RCNOCHECK(rclc_parameter_server_fini(&micro_rosso::param_server, &node););
+#endif
 
   D_println("...Done.");
 }
