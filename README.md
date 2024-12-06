@@ -115,17 +115,44 @@ void loop() {
 
 The `board_microros_transport` field specifies how the board will communicate with the agent. This example uses the Serial transport, which is the first UART or the same USB link used to flash the board. You can [change the transport](https://github.com/micro-ROS/micro_ros_platformio?tab=readme-ov-file#transport-configuration). Each possible transport (serial, Wi-Fi, etc.) must be configured in your code in the setup() method before starting micro_rosso.
 
-### Adding modules
+## Configuring micro_rosso
 
-We recommend placing your project modules in the /lib/ project folder.
+The configuration for micro_rosso is stored in [micro_rosso_config.h](include/micro_rosso_config.h) header. Most variables can be manipulated from your `platformio.ini` file through build flags. For example, to disable the set_time functionality, you can add the following entry:
 
-For external modules, add the corresponding entry in [`lib_deps`](https://docs.platformio.org/en/latest/projectconf/sections/env/options/library/lib_deps.html).
+```ini
+build_flags =
+    -DUSE_SET_TIME=false
+```
+
+Another important element to configure is the maximum number of publishers, services, subscriptions, etc. For this, first add a `myproject.meta` file, for example:
+
+```yaml
+{
+    "names": {
+        "rmw_microxrcedds": {
+            "cmake-args": [
+                "-DRMW_UXRCE_MAX_NODES=1",
+                "-DRMW_UXRCE_MAX_PUBLISHERS=10",
+                "-DRMW_UXRCE_MAX_SUBSCRIPTIONS=10",
+                "-DRMW_UXRCE_MAX_SERVICES=5",
+                "-DRMW_UXRCE_MAX_CLIENTS=0",
+            ]
+        }
+    }
+}
+```
+
+The reference this file from you `platformio.ini` file:
+
+```ini
+board_microros_user_meta = myproject.meta
+```
 
 ## How to use modules
 
 First, we will show how to use a third-party module; later, we will describe how to create your own.
 
-A module is imported as a standard PlatformIO library in any standard way. As an example, we will import the MPU6050 module from GitHub, adding the following entry to the platformio.ini` file:
+A module is imported as a standard PlatformIO library in any standard way. As an example, we will import the MPU6050 module from GitHub, adding the following [entry](https://docs.platformio.org/en/latest/projectconf/sections/env/options/library/lib_deps.html) to the `platformio.ini` file:
 
 ```ini
 lib_deps = 
