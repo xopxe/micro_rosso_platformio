@@ -28,7 +28,7 @@ std::vector<client_descriptor *> micro_rosso::clients;
 std::vector<timer_descriptor *> micro_rosso::timers;
 std::vector<void (*)(ros_states)> micro_rosso::ros_state_listeners;
 #if ROS_PARAMETER_SERVER
-std::vector<void (*) (const Parameter*, const Parameter*)> micro_rosso::parameter_change_listeners;
+std::vector<void (*)(const Parameter *, const Parameter *)> micro_rosso::parameter_change_listeners;
 #endif
 
 timer_descriptor micro_rosso::timer_control;
@@ -58,9 +58,9 @@ static unsigned long long ros_time_offset_ms;
     rcl_ret_t temp_rc = fn;                           \
     if ((temp_rc != RCL_RET_OK))                      \
     {                                                 \
-      D_print("micro_rosso failed on [line:code]: "); \
+      D_print("micro_rosso.cpp failed on [line:code]: "); \
       D_print((int)__LINE__);                         \
-      D_print(" ");                                   \
+      D_print(":");                                   \
       D_print((int)temp_rc);                          \
       D_println();                                    \
       rcutils_reset_error();                          \
@@ -146,9 +146,9 @@ static void shrink_to_fit()
     timer_descriptor *t = micro_rosso::timers[i];
     t->callbacks.shrink_to_fit();
   }
-  #if ROS_PARAMETER_SERVER
+#if ROS_PARAMETER_SERVER
   micro_rosso::parameter_change_listeners.shrink_to_fit();
-  #endif
+#endif
 }
 
 static void timer_handler_control(rcl_timer_t *timer, int64_t last_call_time)
@@ -211,7 +211,7 @@ bool on_parameter_changed(const Parameter *old_param, const Parameter *new_param
   print_parameter_desc(old_param);
   D_print(" -> ");
   print_parameter_desc(new_param);
-  D_println(); 
+  D_println();
 
   for (int i = 0; i < micro_rosso::parameter_change_listeners.size(); i++)
   {
@@ -245,6 +245,15 @@ bool micro_rosso::setup(const char *rosname)
     D_println("FAIL logger.setup()");
     return false;
   };
+
+  D_print("RMW_UXRCE_MAX_PUBLISHERS: ");
+  D_println(RMW_UXRCE_MAX_PUBLISHERS);
+  D_print("RMW_UXRCE_MAX_SUBSCRIPTIONS: ");
+  D_println(RMW_UXRCE_MAX_SUBSCRIPTIONS);
+  D_print("RMW_UXRCE_MAX_SERVICES: ");
+  D_println(RMW_UXRCE_MAX_SERVICES);
+  D_print("RMW_UXRCE_MAX_CLIENTS: ");
+  D_println(RMW_UXRCE_MAX_CLIENTS);
 
   micro_rosso::timer_control.timeout_ns = RCL_MS_TO_NS(TIMER_CONTROL_MS);
   micro_rosso::timer_control.timer_handler = timer_handler_control;
@@ -297,6 +306,23 @@ static const char *reset_reason_string(const RESET_REASON reason)
   }
 }
 
+static const char *ros_state_string(const ros_states state)
+{
+  switch (state)
+  {
+  case WAITING_AGENT:
+    return "WAITING_AGENT";
+  case AGENT_AVAILABLE:
+    return "AGENT_AVAILABLE";
+  case AGENT_CONNECTED:
+    return "AGENT_CONNECTED";
+  case AGENT_DISCONNECTED:
+    return "AGENT_DISCONNECTED";
+  default:
+    return "";
+  }
+};
+
 // Functions create_entities and destroy_entities can take several seconds.
 // In order to reduce this rebuild the library with
 // - RMW_UXRCE_ENTITY_CREATION_DESTROY_TIMEOUT=0
@@ -317,10 +343,12 @@ static bool create_entities()
   D_println(micro_rosso::clients.size());
   D_print("state listeners: ");
   D_println(micro_rosso::ros_state_listeners.size());
-  #if ROS_PARAMETER_SERVER
-  D_print("parameter change  listeners: ");
+#if ROS_PARAMETER_SERVER
+  D_print("parameter server handles: ");
+  D_println(RCLC_EXECUTOR_PARAMETER_SERVER_HANDLES);
+  D_print("parameter change listeners: ");
   D_println(micro_rosso::parameter_change_listeners.size());
-  #endif
+#endif
 
   allocator = rcl_get_default_allocator();
 
@@ -374,10 +402,6 @@ static bool create_entities()
   }
 
   // create services
-  if (micro_rosso::services.size() > 1)
-  {
-    D_println("WARNING: services, verify DRMW_UXRCE_MAX_SERVICES in colcon.meta ");
-  }
   for (int i = 0; i < micro_rosso::services.size(); i++)
   {
     service_descriptor *s = micro_rosso::services[i];
@@ -418,7 +442,6 @@ static bool create_entities()
   }
 
 #if ROS_PARAMETER_SERVER
-  D_println("WARNING: parameter_server, verify DRMW_UXRCE_MAX_SERVICES in colcon.meta ");
   RCCHECK(rclc_parameter_server_init_with_option(
       &micro_rosso::param_server, &node, &parameter_options));
   // RCCHECK(rclc_parameter_server_init_default(&param_server, &node));
@@ -500,7 +523,7 @@ static bool create_entities()
 
 static void destroy_entities()
 {
-  D_println("Destroying ROS2 entities... ");
+  D_print("Destroying ROS2 entities... ");
 
   rmw_context_t *rmw_context = rcl_context_get_rmw_context(&support.context);
   (void)rmw_uros_set_context_entity_destroy_session_timeout(rmw_context, 0);
@@ -580,7 +603,7 @@ void micro_rosso::loop()
   if (ros_state != ros_state_last)
   {
     D_print("ROS2 state: ");
-    D_println(ros_state);
+    D_println(ros_state_string(ros_state));
 
     for (int i = 0; i < micro_rosso::ros_state_listeners.size(); i++)
     {
