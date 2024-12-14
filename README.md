@@ -142,7 +142,7 @@ Another important element to configure is the maximum number of publishers, serv
 }
 ```
 
-The reference this file from you `platformio.ini` file:
+The reference this file from your `platformio.ini` file:
 
 ```ini
 board_microros_user_meta = myproject.meta
@@ -334,7 +334,7 @@ bool MyModule::setup() {
 
 ### Serve services
 
-See the example in the `sync_time` module to create and announce a service. First, create a service descriptor and the request and response objects:
+See the example in the `sync_time` module for creating and announcing a service. First, create a service descriptor and the request and response objects:
 
 ```cpp
 static service_descriptor my_service;
@@ -396,9 +396,112 @@ bool MyModule::setup() {
 }
 ```
 
-### TODO consume services
+### Use the parameter server
 
-### TODO parameter server
+You can enable the micro-ros [parameter server](https://micro.ros.org/docs/tutorials/programming_rcl_rclc/parameters/) by setting the appropriate compiler flag in your `platformio.ini` file:
+
+```ini
+build_flags =
+    -DROS_PARAMETER_SERVER=true
+```
+
+Notice that the parameter server uses additional slots (6?) from the available services. See above in the "## Configuring micro_rosso" section to increase the number of services.
+
+To react to the creation, modification, and removal of configuration parameters, you must subscribe to the `parameter_change_listeners` list:
+
+```cpp
+static void parameter_change_cb(const Parameter *old_param, const Parameter *new_param) {
+  if (old_param == NULL) {
+    if (new_param != NULL && strcmp(new_param->name.data, "parameter1") == 0) {
+      // parameter1 created
+    }
+  } else {
+    if (new_param == NULL) {
+      // parameter1 deleted
+    } else if (strcmp(new_param->name.data, "parameter1") == ) {
+      // parameter1 updated
+    }
+  }
+}
+
+bool MyModule::setup()
+{
+  ...
+  micro_rosso::parameter_change_listeners.push_back(parameter_change_cb);
+  ...
+  return true;
+}
+```
+
+You might want to create the variables from inside your firmware, and give it initial values. You must do that from a ros status change even, once the ros is connected. For that you must register a ros status listener as described above, and add the parameter creation code:
+
+```
+static void ros_state_cb(ros_states state)
+{
+  switch (state)
+  {
+  case AGENT_CONNECTED:
+    rclc_add_parameter(&micro_rosso::param_server, "parameter1", RCLC_PARAMETER_INT);
+    RCNOCHECK(rclc_parameter_set_int(&micro_rosso::param_server, "parameter1", 10));
+    break;
+  case AGENT_DISCONNECTED:
+    rclc_delete_parameter(&micro_rosso::param_server, "parameter1");
+    break;
+  default:
+    break;
+  }
+}
+```
+
+Remember that the micro-ros parameter server only supports `int64`, `double`, and `bool` parameters.
+
+### Enabling persistence for the parameter server
+
+The parameter_persist module allows to parameter values to be preserved across board reboots. To enable it, load the module the usal way. In your `main.cpp` add:
+
+```cpp
+#include "parameter_persist.h"
+ParameterPersist persist;
+...
+void setup() {
+  ...
+  if (!persist.setup()) {
+    D_println("FAIL persist.setup()");
+  };
+}
+```
+
+You can specify what parameters to persist using two attributes in the parameter_persits modules:
+
+* `bool ParameterPersist::persist_all`: if set to true, all parameters will be persisted. If set to false, only the ones in the following list will:
+
+* `std::vector<char *> ParameterPersist::persist_list`: a list of strings with the names of the parameters to persist.
+
+When using persistence, you must assign a default value to a parameter only when it is not already initialized from flash:
+
+```cpp
+static void ros_state_cb(ros_states state)
+{
+  int rc;
+  switch (state)
+  {
+  case AGENT_CONNECTED:
+    rc = rclc_add_parameter(&micro_rosso::param_server, "parameter1", RCLC_PARAMETER_INT);
+    if (rc == 0) {
+      // the parameter was added successfully, so it wasn't created before, assign a value:
+      RCNOCHECK(rclc_parameter_set_int(&micro_rosso::param_server, "parameter1", 10));
+    }
+    break;
+  case AGENT_DISCONNECTED:
+    rclc_delete_parameter(&micro_rosso::param_server, "parameter1");
+    break;
+  default:
+    break;
+  }
+}
+```
+
+### TODO consume services
 
 ## Example commands
 
