@@ -1,3 +1,5 @@
+#if ROS_PARAMETER_SERVER
+
 #include <Arduino.h>
 #include <Preferences.h>
 #include <nvs.h>
@@ -206,3 +208,5 @@ bool ParameterPersist::setup(bool readonly)
 
   return true;
 }
+
+#endif //ROS_PARAMETER_SERVER

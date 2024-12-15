@@ -337,18 +337,18 @@ static bool create_entities()
   D_println(micro_rosso::publishers.size());
   D_print("subscriptions: ");
   D_println(micro_rosso::subscribers.size());
-  D_print("services: ");
-  D_println(micro_rosso::services.size());
   D_print("clients: ");
   D_println(micro_rosso::clients.size());
-  D_print("state listeners: ");
-  D_println(micro_rosso::ros_state_listeners.size());
+  D_print("services: ");
+  D_println(micro_rosso::services.size());
 #if ROS_PARAMETER_SERVER
-  D_print("parameter server handles: ");
+  D_print("parameter server services: ");
   D_println(RCLC_EXECUTOR_PARAMETER_SERVER_HANDLES);
   D_print("parameter change listeners: ");
   D_println(micro_rosso::parameter_change_listeners.size());
 #endif
+  D_print("state listeners: ");
+  D_println(micro_rosso::ros_state_listeners.size());
 
   allocator = rcl_get_default_allocator();
 
@@ -442,6 +442,8 @@ static bool create_entities()
   }
 
 #if ROS_PARAMETER_SERVER
+  // create service for parameter service
+  D_println("+parameter server");
   RCCHECK(rclc_parameter_server_init_with_option(
       &micro_rosso::param_server, &node, &parameter_options));
   // RCCHECK(rclc_parameter_server_init_default(&param_server, &node));
