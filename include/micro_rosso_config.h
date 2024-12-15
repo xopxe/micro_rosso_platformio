@@ -46,7 +46,7 @@ build_flags =
  Set to true to enable the parameter server
 */
 #if !defined(ROS_PARAMETER_SERVER)
-#define ROS_PARAMETER_SERVER true
+#define ROS_PARAMETER_SERVER false
 #endif
 /*
  The configuration for the parameter server (used if enabled)
