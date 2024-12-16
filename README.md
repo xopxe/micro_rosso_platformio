@@ -156,7 +156,7 @@ A module is imported as a standard PlatformIO library in any standard way. As an
 
 ```ini
 lib_deps = 
-    https://github.com/xopxe/micro_rosso_platformio.git
+    xopxe/micro_rosso @ ^0.1.4
     https://github.com/xopxe/micro_rosso_mpu6050.git
 ```
 
@@ -195,17 +195,15 @@ build_flags =
 
 ## How to write a module
 
-A micro\_rosso module is a mostly static object that provides a setup method where it registers ros2 resources using `micro_rosso.h`. It then uses micro_ros_platformio and other modules to implement its functionality.
-
-Things a module can do:
-
-### Subscribe to topics
-
-You have various options for where to place libraries in your project:
+A micro\_rosso module is a mostly static object that provides a setup method where it registers ros2 resources using `micro_rosso.h`. It then uses micro_ros_platformio and other modules to implement its functionality. You have various options for where to place libraries in your project:
 
 * Both .h and .cpp files in the src/ directory. (quick and dirty)
 * The .h in the include/ folder, the .cpp in src/ (good for when you are writing a library you will publish)
 * In a lib/my_module/ folder (good for private modules that only make sense for your project.)
+
+Things a module can do:
+
+### Subscribe to topics
 
 The following example is derived from the [`mobility_tracked`](https://github.com/xopxe/oruga/tree/main/lib/mobility_tracked) module. It will subscribe to `/cmd_vel` topics of type `cmd_vel`.
 
@@ -433,7 +431,7 @@ bool MyModule::setup()
 }
 ```
 
-You might want to create the variables from inside your firmware, and give it initial values. You must do that from a ros status change even, once the ros is connected. For that you must register a ros status listener as described above, and add the parameter creation code:
+You might want to create the variables from inside your firmware, and give them initial values. You must do that from a ros status change event, once the ros is connected. For that, you must register a ros status listener as described above and add the parameter creation code:
 
 ```
 static void ros_state_cb(ros_states state)
@@ -442,7 +440,7 @@ static void ros_state_cb(ros_states state)
   {
   case AGENT_CONNECTED:
     rclc_add_parameter(&micro_rosso::param_server, "parameter1", RCLC_PARAMETER_INT);
-    RCNOCHECK(rclc_parameter_set_int(&micro_rosso::param_server, "parameter1", 10));
+    rclc_parameter_set_int(&micro_rosso::param_server, "parameter1", 10);
     break;
   case AGENT_DISCONNECTED:
     rclc_delete_parameter(&micro_rosso::param_server, "parameter1");
@@ -457,7 +455,7 @@ Remember that the micro-ros parameter server only supports `int64`, `double`, an
 
 ### Enabling persistence for the parameter server
 
-The parameter_persist module allows to parameter values to be preserved across board reboots. To enable it, load the module the usal way. In your `main.cpp` add:
+The `parameter_persist` module allows parameter values to be preserved across board reboots. To enable it, load the module the usual way. In your `main.cpp` add:
 
 ```cpp
 #include "parameter_persist.h"
@@ -488,7 +486,7 @@ static void ros_state_cb(ros_states state)
   case AGENT_CONNECTED:
     rc = rclc_add_parameter(&micro_rosso::param_server, "parameter1", RCLC_PARAMETER_INT);
     if (rc == 0) {
-      // the parameter was added successfully, so it wasn't created before, assign a value:
+      // the parameter was added successfully, so it wasn't created before. Assign a value:
       RCNOCHECK(rclc_parameter_set_int(&micro_rosso::param_server, "parameter1", 10));
     }
     break;
@@ -500,6 +498,8 @@ static void ros_state_cb(ros_states state)
   }
 }
 ```
+
+NOTE: This service uses the portable Arduino `Preferences` library. Unfortunately, this library does not support discovering the data stored on Flash. So, for this purpose the service uses the ESP32native nvs.h library. If you are porting this system to another platform, you will have to replace that code.
 
 ### TODO consume services
 
