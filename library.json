@@ -1,6 +1,6 @@
 {
     "name": "micro_rosso",
-    "version": "0.1.4",
+    "version": "0.2.0",
     "description": "A modular system for micro-ros",
     "keywords": "ros, micro-ros, robot, micro_rosso",
     "repository":
