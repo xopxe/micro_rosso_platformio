@@ -416,7 +416,7 @@ static void parameter_change_cb(const Parameter *old_param, const Parameter *new
   } else {
     if (new_param == NULL) {
       // parameter1 deleted
-    } else if (strcmp(new_param->name.data, "parameter1") == ) {
+    } else if (strcmp(new_param->name.data, "parameter1") == 0) {
       // parameter1 updated
     }
   }
