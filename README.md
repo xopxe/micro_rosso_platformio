@@ -12,7 +12,7 @@ First, you will need [ROS2 installed](https://docs.ros.org/en/dashing/Installati
 
 Then you have to install micro-ros. There are two ways: native build (harder) or a docker image (easier).
 
-### micro-ros from a snap
+### micro-ros from a docker
 
 You can run a micro-ros installation directly from a docker image. For example, when using serial transport to communicate with the microcontroller (change the `humble` for `jazzy` as needed):
 
