@@ -12,7 +12,7 @@ First, you will need [ROS2 installed](https://docs.ros.org/en/dashing/Installati
 
 Then you have to install micro-ros. There are two ways: native build (harder) or a docker image (easier).
 
-### micro-ros from a snap
+### micro-ros from docker
 
 You can run a micro-ros installation directly from a docker image. For example, when using serial transport to communicate with the microcontroller (change the `humble` for `jazzy` as needed):
 
@@ -433,7 +433,7 @@ bool MyModule::setup()
 
 You might want to create the variables from inside your firmware, and give them initial values. You must do that from a ros status change event, once the ros is connected. For that, you must register a ros status listener as described above and add the parameter creation code:
 
-```
+```cpp
 static void ros_state_cb(ros_states state)
 {
   switch (state)
