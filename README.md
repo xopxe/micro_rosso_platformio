@@ -433,7 +433,7 @@ bool MyModule::setup()
 
 You might want to create the variables from inside your firmware, and give them initial values. You must do that from a ros status change event, once the ros is connected. For that, you must register a ros status listener as described above and add the parameter creation code:
 
-```
+```cpp
 static void ros_state_cb(ros_states state)
 {
   switch (state)
