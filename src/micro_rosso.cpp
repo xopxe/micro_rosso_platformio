@@ -53,19 +53,19 @@ static unsigned long long ros_time_offset_ms;
     if ((temp_rc != RCL_RET_OK)) { return false; } \
   }
 */
-#define RCCHECK(fn)                                   \
-  {                                                   \
-    rcl_ret_t temp_rc = fn;                           \
-    if ((temp_rc != RCL_RET_OK))                      \
-    {                                                 \
+#define RCCHECK(fn)                                       \
+  {                                                       \
+    rcl_ret_t temp_rc = fn;                               \
+    if ((temp_rc != RCL_RET_OK))                          \
+    {                                                     \
       D_print("micro_rosso.cpp failed on [line:code]: "); \
-      D_print((int)__LINE__);                         \
-      D_print(":");                                   \
-      D_print((int)temp_rc);                          \
-      D_println();                                    \
-      rcutils_reset_error();                          \
-      return 1;                                       \
-    }                                                 \
+      D_print((int)__LINE__);                             \
+      D_print(":");                                       \
+      D_print((int)temp_rc);                              \
+      D_println();                                        \
+      rcutils_reset_error();                              \
+      return 1;                                           \
+    }                                                     \
   }
 #define RCNOCHECK(fn)       \
   {                         \
@@ -332,7 +332,6 @@ static bool create_entities()
   D_print("Creating ROS2 entities for node: ");
   D_println(ros2_node_name);
 
-  shrink_to_fit();
   D_print("publishers: ");
   D_println(micro_rosso::publishers.size());
   D_print("subscriptions: ");
@@ -501,6 +500,15 @@ static bool create_entities()
   rclc_executor_add_parameter_server(
       &executor, &micro_rosso::param_server, on_parameter_changed);
 #endif
+
+  // release the vectors to free memory
+  micro_rosso::logger.log("Release initialization vectors.");
+  micro_rosso::publishers.clear();
+  micro_rosso::subscribers.clear();
+  micro_rosso::timers.clear();
+  micro_rosso::services.clear();
+  micro_rosso::clients.clear();
+  shrink_to_fit();
 
   D_println("...Done.");
   delay(500);
