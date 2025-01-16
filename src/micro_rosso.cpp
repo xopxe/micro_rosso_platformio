@@ -375,6 +375,10 @@ static bool create_entities()
       RCCHECK(rclc_publisher_init_best_effort(
           &(p->publisher), &node, p->type_support, p->topic_name));
       break;
+    case QOS_CUSTOM:
+      RCCHECK(rclc_publisher_init(
+          &(p->publisher), &node, p->type_support, p->topic_name, p->qos_profile));
+      break;
     }
   }
 

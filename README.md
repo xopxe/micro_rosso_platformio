@@ -156,7 +156,7 @@ A module is imported as a standard PlatformIO library in any standard way. As an
 
 ```ini
 lib_deps = 
-    xopxe/micro_rosso @ ^0.1.4
+    xopxe/micro_rosso @ ^0.2.0
     https://github.com/xopxe/micro_rosso_mpu6050.git
 ```
 
@@ -279,6 +279,8 @@ The topic then can be published from methods, timers, event handlers, etc., as f
   rcl_publish(&my_topic.publisher, &msg_tick, NULL);
   msg_tick.data++;
 ```
+
+You can also use custom QoS setting `my_topic.qos = QOS_CUSTOM;` and providing a QoS profile in the `my_topic.qos_profile` field.
 
 ### Use and register timers
 
