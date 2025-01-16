@@ -2,7 +2,7 @@
 
 This is a modular system for micro-ros under PlatformIO. It allows you to write modules that can interact with ROS2 sending and receiving topics, publishing services, and so on.
 
-For an example of an application that uses micro-rosso, see [oruga](https://github.com/xopxe/oruga), a tracked robot. In its [platformio.ini](https://github.com/xopxe/oruga/blob/main/platformio.ini) file you'll see that it's an ESP32 project that uses Arduino framework, uses ROS2 jazzy, and depends on [micro-rosso](https://github.com/xopxe/micro_rosso_platformio) library. It provides its functionality in modules, such as the [mobility system](https://github.com/xopxe/oruga/tree/main/lib/mobility_tracked). It also depends on external modules, such as [mpu6050](https://github.com/xopxe/micro_rosso_mpu6050) IMU.
+For an example of an application that uses micro-rosso, see [oruga](https://github.com/xopxe/micro_rosso_oruga), a tracked robot. In its [platformio.ini](https://github.com/xopxe/micro_rosso_oruga/blob/main/platformio.ini) file you'll see that it's an ESP32 project that uses Arduino framework, uses ROS2 jazzy, and depends on [micro-rosso](https://github.com/xopxe/micro_rosso_platformio) library. It provides its functionality in modules, such as the [mobility system](https://github.com/xopxe/micro_rosso_oruga/tree/main/lib/mobility_tracked). It also depends on external modules, such as [mpu6050](https://github.com/xopxe/micro_rosso_mpu6050) IMU.
 
 ## Install
 
@@ -205,7 +205,7 @@ Things a module can do:
 
 ### Subscribe to topics
 
-The following example is derived from the [`mobility_tracked`](https://github.com/xopxe/oruga/tree/main/lib/mobility_tracked) module. It will subscribe to `/cmd_vel` topics of type `cmd_vel`.
+The following example is derived from the [`mobility_tracked`](https://github.com/xopxe/micro_rosso_oruga/tree/main/lib/mobility_tracked) module. It will subscribe to `/cmd_vel` topics of type `cmd_vel`.
 
 In the `my_module.h` file, create the module class:
 
