@@ -107,10 +107,10 @@ public:
   static std::vector<client_descriptor *> clients;
   static std::vector<timer_descriptor *> timers;
   static std::vector<void (*)(ros_states)> ros_state_listeners;
+  static std::vector<void (*)(void)> post_init;
   #if ROS_PARAMETER_SERVER
   static std::vector<void (*) (const Parameter*, const Parameter*)>parameter_change_listeners;
   #endif
-
 
   static timer_descriptor timer_control;
   static timer_descriptor timer_report;

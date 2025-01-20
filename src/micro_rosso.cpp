@@ -27,6 +27,7 @@ std::vector<service_descriptor *> micro_rosso::services;
 std::vector<client_descriptor *> micro_rosso::clients;
 std::vector<timer_descriptor *> micro_rosso::timers;
 std::vector<void (*)(ros_states)> micro_rosso::ros_state_listeners;
+std::vector<void (*)(void)> micro_rosso::post_init;
 #if ROS_PARAMETER_SERVER
 std::vector<void (*)(const Parameter *, const Parameter *)> micro_rosso::parameter_change_listeners;
 #endif
@@ -141,6 +142,7 @@ static void shrink_to_fit()
   micro_rosso::clients.shrink_to_fit();
   micro_rosso::timers.shrink_to_fit();
   micro_rosso::ros_state_listeners.shrink_to_fit();
+  micro_rosso::post_init.shrink_to_fit();
   for (int i = 0; i < micro_rosso::timers.size(); i++)
   {
     timer_descriptor *t = micro_rosso::timers[i];
@@ -331,6 +333,7 @@ static bool create_entities()
 {
   D_print("Creating ROS2 entities for node: ");
   D_println(ros2_node_name);
+  shrink_to_fit();
 
   D_print("publishers: ");
   D_println(micro_rosso::publishers.size());
@@ -348,6 +351,8 @@ static bool create_entities()
 #endif
   D_print("state listeners: ");
   D_println(micro_rosso::ros_state_listeners.size());
+  D_print("post init callbacks: ");
+  D_println(micro_rosso::post_init.size());
 
   allocator = rcl_get_default_allocator();
 
@@ -501,15 +506,6 @@ static bool create_entities()
       &executor, &micro_rosso::param_server, on_parameter_changed);
 #endif
 
-  // release the vectors to free memory
-  micro_rosso::logger.log("Release initialization vectors.");
-  micro_rosso::publishers.clear();
-  micro_rosso::subscribers.clear();
-  micro_rosso::timers.clear();
-  micro_rosso::services.clear();
-  micro_rosso::clients.clear();
-  shrink_to_fit();
-
   D_println("...Done.");
   delay(500);
 
@@ -531,6 +527,11 @@ static bool create_entities()
   }
 
   micro_rosso::time_sync();
+
+  for (int i = 0; i < micro_rosso::post_init.size(); i++)
+  {
+    micro_rosso::post_init[i]();
+  }
 
   return true;
 }

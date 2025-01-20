@@ -396,6 +396,23 @@ bool MyModule::setup() {
 }
 ```
 
+### Post init callbacks
+
+If your module needs to do something after ROS has been initialized, like publish some topics, you can add a callback:
+
+```cpp
+static void on_start() {
+  ...
+}
+
+bool MyModule::setup() {
+  ...
+  micro_rosso::post_init.push_back(on_start);
+  ...
+  return true;
+}
+```
+
 ### Use the parameter server
 
 You can enable the micro-ros [parameter server](https://micro.ros.org/docs/tutorials/programming_rcl_rclc/parameters/) by setting the appropriate compiler flag in your `platformio.ini` file:
