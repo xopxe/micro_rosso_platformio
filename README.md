@@ -8,17 +8,19 @@ For an example of an application that uses micro-rosso, see [oruga](https://gith
 
 To use micro-rosso, you need a working micro-ros environment and a PlatformIO environment.
 
-First, you will need [ROS2 installed](https://docs.ros.org/en/dashing/Installation/Ubuntu-Install-Binary.html).
+First, you will need [ROS2 installed](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html).
 
 Then you have to install micro-ros. There are two ways: native build (harder) or a docker image (easier).
 
 ### micro-ros from a docker
 
-You can run a micro-ros installation directly from a docker image. For example, when using serial transport to communicate with the microcontroller (change the `humble` for `jazzy` as needed):
+You can run a micro-ros installation directly from a docker image. For example, when using serial transport to communicate with the microcontroller:
 
 ```sh
 docker run -it --rm --device=/dev/ttyUSB_ESP32 --net=host microros/micro-ros-agent:jazzy serial --dev /dev/ttyUSB_ESP32 -b 115200
 ```
+
+You can change the `humble` for `jazzy`or whatever ROS2 version you are using.
 
 When using wifi transport:
 
@@ -396,13 +398,13 @@ bool MyModule::setup() {
 }
 ```
 
-### Post init callbacks
+### Post-init callback
 
 If your module needs to do something after ROS has been initialized, like publish some topics, you can add a callback:
 
 ```cpp
 static void on_start() {
-  ...
+  micro_rosso::logger.log("MyModule running"); // sends /rosout topic
 }
 
 bool MyModule::setup() {
@@ -539,4 +541,4 @@ ros2 topic echo /rosout --field msg
 
 ## License
 
-MIT
+Apache 2.0
