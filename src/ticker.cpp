@@ -47,7 +47,7 @@ static void timer_handler_tick(rcl_timer_t *timer, int64_t last_call_time)
 
 bool Ticker::setup(const char *topic_name)
 {
-  D_println("setup: ticker");
+  D_print("setup: ticker... ");
 
   pdescriptor_tick.qos = QOS_DEFAULT;
   pdescriptor_tick.type_support =
@@ -62,5 +62,6 @@ bool Ticker::setup(const char *topic_name)
   Ticker::timer_tick.callbacks.push_back(&tick_cb);
   micro_rosso::timers.push_back(&Ticker::timer_tick);
 
+  D_println("done.");
   return true;
 }

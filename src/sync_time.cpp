@@ -34,7 +34,7 @@ static void service_sync_time_cb(const void *req, void *res)
 
 bool SyncTime::setup(const char *service_name)
 {
-  D_println("init time syncer");
+  D_print("setup: time syncer... ");
 
   res_sync_time.message.data = (char *)&res_sync_time_message;
   res_sync_time.message.size = 1;
@@ -50,5 +50,6 @@ bool SyncTime::setup(const char *service_name)
 
   micro_rosso::services.push_back(&sdescriptor_sync_time);
 
+  D_println("done.");
   return true;
 }

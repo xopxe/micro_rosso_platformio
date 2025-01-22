@@ -24,14 +24,6 @@ build_flags =
 // #define DEBUG_CONSOLE_BAUD 115200
 
 /*
- Set the time on the microconroller from ROS, useful
- for non-ROS code that might whant to know the time.
-*/
-#if !defined(USE_SET_TIME)
-#define USE_SET_TIME true
-#endif
-
-/*
  The two default timers created, one for control tasks
  (e.g. pid), and another for reporting (e.g. odom)
 */

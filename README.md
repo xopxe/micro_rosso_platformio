@@ -119,11 +119,14 @@ The `board_microros_transport` field specifies how the board will communicate wi
 
 ## Configuring micro_rosso
 
-The configuration for micro_rosso is stored in [micro_rosso_config.h](include/micro_rosso_config.h) header. Most variables can be manipulated from your `platformio.ini` file through build flags. For example, to disable the set_time functionality, you can add the following entry:
+The configuration for micro_rosso is stored in [micro_rosso_config.h](include/micro_rosso_config.h) header. Most variables can be manipulated from your `platformio.ini` file through build flags. For example, to configure a serial console to monitor the firmware you could do:
 
 ```ini
 build_flags =
-    -DUSE_SET_TIME=false
+    -DDEBUG_CONSOLE=Serial1
+    -DDEBUG_CONSOLE_PIN_RX=10
+    -DDEBUG_CONSOLE_PIN_TX=9
+    -DDEBUG_CONSOLE_BAUD=115200
 ```
 
 Another important element to configure is the maximum number of publishers, services, subscriptions, etc. For this, first add a `myproject.meta` file, for example:
@@ -158,7 +161,7 @@ A module is imported as a standard PlatformIO library in any standard way. As an
 
 ```ini
 lib_deps = 
-    xopxe/micro_rosso @ ^0.2.0
+    xopxe/micro_rosso
     https://github.com/xopxe/micro_rosso_mpu6050.git
 ```
 

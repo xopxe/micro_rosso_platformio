@@ -1,9 +1,5 @@
 #include "micro_rosso.h"
 
-#if USE_SET_TIME
-#include <TimeLib32.h>
-#endif
-
 #include <rcl/rcl.h>
 #include <rcl/error_handling.h>
 #include <rclc/rclc.h>
@@ -44,8 +40,6 @@ static const char *ros2_node_name; // ROS2_NODE_NAME
 
 ros_states ros_state;
 ros_states ros_state_last;
-
-static unsigned long long ros_time_offset_ms;
 
 /*
 #define RCCHECK(fn) \
@@ -101,20 +95,9 @@ bool micro_rosso::time_sync()
   int64_t time_ms = rmw_uros_epoch_millis();
   if (time_ms > 0)
   {
-    ros_time_offset_ms = time_ms - millis();
-    char offset_str[20 + 21]{0};
-    // memset(offset_str, 0x00, 20 + 11);
-    sprintf(offset_str, "Agent time offset: %" PRIu64, ros_time_offset_ms);
-    micro_rosso::logger.log(offset_str);
-#if USE_SET_TIME
-    time_t time_seconds = time_ms / 1000;
-    char time_str[12 + 25]{0};
-    // memset(time_str, 0x00, 12 + 25);
-    setTime(time_seconds);
-    sprintf(time_str, "Agent date: %02d.%02d.%04d %02d:%02d:%02d.%03d",
-            day(), month(), year(), hour(), minute(), second(), (uint)time_ms % 1000);
-    micro_rosso::logger.log(time_str);
-#endif
+    char epoch_str[20 + 21]{0};
+    sprintf(epoch_str, "uros_epoch_millis: %" PRIu64, time_ms);
+    micro_rosso::logger.log(epoch_str);
   }
   else
   {
@@ -129,9 +112,21 @@ bool micro_rosso::time_sync()
 
 void micro_rosso::set_timestamp(builtin_interfaces__msg__Time &stamp)
 {
-  unsigned long now = millis() + ros_time_offset_ms;
+  int64_t now = rmw_uros_epoch_millis();
   stamp.sec = now / 1000;
   stamp.nanosec = (now % 1000) * 1000000;
+}
+
+void micro_rosso::set_timestamp_ms(builtin_interfaces__msg__Time &stamp, int64_t now)
+{
+  stamp.sec = now / 1000;
+  stamp.nanosec = (now % 1000) * 1000000;
+}
+
+void micro_rosso::set_timestamp_ns(builtin_interfaces__msg__Time &stamp, int64_t now)
+{
+  stamp.sec = now / 1000000000;
+  stamp.nanosec = now % 1000000000;
 }
 
 static void shrink_to_fit()
@@ -230,7 +225,7 @@ bool micro_rosso::setup(const char *rosname)
   D_SerialBegin(DEBUG_CONSOLE_BAUD, SERIAL_8N1, DEBUG_CONSOLE_PIN_RX, DEBUG_CONSOLE_PIN_TX);
 #endif
 
-  D_println("Setting up micro_rosso... ");
+  D_println("Setting up micro_rosso started... ");
 
   reset_reason_0 = rtc_get_reset_reason(0);
   reset_reason_1 = rtc_get_reset_reason(1);
@@ -265,7 +260,7 @@ bool micro_rosso::setup(const char *rosname)
   micro_rosso::timer_report.timer_handler = timer_handler_report;
   micro_rosso::timers.push_back(&micro_rosso::timer_report);
 
-  D_println("Done.");
+  D_println("Setting up micro_rosso done.");
   return true;
 }
 
@@ -362,6 +357,8 @@ static bool create_entities()
   // create node
   RCCHECK(rclc_node_init_default(&node, ros2_node_name, "", &support));
 
+  micro_rosso::time_sync();
+
   // create publisher
   for (int i = 0; i < micro_rosso::publishers.size(); i++)
   {
@@ -396,7 +393,7 @@ static bool create_entities()
         &(s->subscriber), &node, s->type_support, s->topic_name));
   }
 
-  // create timers,
+  // create timers
   for (int i = 0; i < micro_rosso::timers.size(); i++)
   {
     timer_descriptor *t = micro_rosso::timers[i];
@@ -506,7 +503,7 @@ static bool create_entities()
       &executor, &micro_rosso::param_server, on_parameter_changed);
 #endif
 
-  D_println("...Done.");
+  D_println("Creation of ROS2 entities finished.");
   delay(500);
 
   micro_rosso::logger.log("ROS2 Connected.");
@@ -525,8 +522,6 @@ static bool create_entities()
     micro_rosso::logger.log(reset_reason_str);
     reset_reason_1 = (RESET_REASON)0;
   }
-
-  micro_rosso::time_sync();
 
   for (int i = 0; i < micro_rosso::post_init.size(); i++)
   {
@@ -582,7 +577,7 @@ static void destroy_entities()
   RCNOCHECK(rclc_parameter_server_fini(&micro_rosso::param_server, &node););
 #endif
 
-  D_println("...Done.");
+  D_println("done.");
 }
 
 void micro_rosso::loop()

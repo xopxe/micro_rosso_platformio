@@ -116,6 +116,9 @@ public:
   static timer_descriptor timer_report;
 
   static void set_timestamp(builtin_interfaces__msg__Time &stamp);
+  static void set_timestamp_ms(builtin_interfaces__msg__Time &stamp, int64_t now);
+  static void set_timestamp_ns(builtin_interfaces__msg__Time &stamp, int64_t now);
+
   static bool time_sync();
 
   static void loop();

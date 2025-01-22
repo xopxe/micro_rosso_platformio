@@ -36,11 +36,12 @@ static void ros_state_cb(ros_states state)
 
 bool RosStatus::setup()
 {
-  D_println("setup: ros_status");
+  D_print("setup: ros_status... ");
 
   LED_ROS2_CONFIGURE();
 
   micro_rosso::ros_state_listeners.push_back(ros_state_cb);
 
+  D_println("done.");
   return true;
 }

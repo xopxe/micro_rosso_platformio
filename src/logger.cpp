@@ -26,7 +26,7 @@ Logger::Logger() {}
 
 bool Logger::setup(const char *topic_name)
 {
-  D_println("setup: roslogger");
+  D_print("setup: roslogger... ");
 
   msg_log.name.data = (char *)topic_name;
   msg_log.name.size = strlen(msg_log.name.data);
@@ -37,6 +37,7 @@ bool Logger::setup(const char *topic_name)
   pdescriptor_roslog.topic_name = topic_name;
   micro_rosso::publishers.push_back(&pdescriptor_roslog);
 
+  D_println("done.");
   return true;
 }
 

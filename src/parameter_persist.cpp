@@ -201,11 +201,12 @@ static void parameter_change_cb(const Parameter *old_param, const Parameter *new
 
 bool ParameterPersist::setup(bool readonly)
 {
-  D_println("setup: parameter_persist");
+  D_print("setup: parameter_persist... ");
 
   micro_rosso::ros_state_listeners.push_back(ros_state_cb);
   micro_rosso::parameter_change_listeners.push_back(parameter_change_cb);
 
+  D_println("done.");
   return true;
 }
 
