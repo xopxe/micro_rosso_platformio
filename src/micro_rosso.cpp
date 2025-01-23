@@ -243,15 +243,6 @@ bool micro_rosso::setup(const char *rosname)
     return false;
   };
 
-  D_print("RMW_UXRCE_MAX_PUBLISHERS: ");
-  D_println(RMW_UXRCE_MAX_PUBLISHERS);
-  D_print("RMW_UXRCE_MAX_SUBSCRIPTIONS: ");
-  D_println(RMW_UXRCE_MAX_SUBSCRIPTIONS);
-  D_print("RMW_UXRCE_MAX_SERVICES: ");
-  D_println(RMW_UXRCE_MAX_SERVICES);
-  D_print("RMW_UXRCE_MAX_CLIENTS: ");
-  D_println(RMW_UXRCE_MAX_CLIENTS);
-
   micro_rosso::timer_control.timeout_ns = RCL_MS_TO_NS(TIMER_CONTROL_MS);
   micro_rosso::timer_control.timer_handler = timer_handler_control;
   micro_rosso::timers.push_back(&micro_rosso::timer_control);
@@ -331,15 +322,27 @@ static bool create_entities()
   shrink_to_fit();
 
   D_print("publishers: ");
-  D_println(micro_rosso::publishers.size());
+  D_print(micro_rosso::publishers.size());
+  D_print(",  RMW_UXRCE_MAX_PUBLISHERS: ");
+  D_println(RMW_UXRCE_MAX_PUBLISHERS);
+
   D_print("subscriptions: ");
-  D_println(micro_rosso::subscribers.size());
+  D_print(micro_rosso::subscribers.size());
+  D_print(", RMW_UXRCE_MAX_SUBSCRIPTIONS: ");
+  D_println(RMW_UXRCE_MAX_SUBSCRIPTIONS);
+
   D_print("clients: ");
-  D_println(micro_rosso::clients.size());
+  D_print(micro_rosso::clients.size());
+  D_print(", RMW_UXRCE_MAX_CLIENTS: ");
+  D_println(RMW_UXRCE_MAX_CLIENTS);
+
   D_print("services: ");
-  D_println(micro_rosso::services.size());
+  D_print(micro_rosso::services.size());
+  D_print(", RMW_UXRCE_MAX_SERVICES: ");
+  D_println(RMW_UXRCE_MAX_SERVICES);
+
 #if ROS_PARAMETER_SERVER
-  D_print("parameter server services: ");
+  D_print("parameter server services (add to 'services' above): ");
   D_println(RCLC_EXECUTOR_PARAMETER_SERVER_HANDLES);
   D_print("parameter change listeners: ");
   D_println(micro_rosso::parameter_change_listeners.size());
