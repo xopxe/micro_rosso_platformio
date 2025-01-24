@@ -2,7 +2,7 @@
 
 This is a modular system for micro-ros under PlatformIO. It allows you to write modules that can interact with ROS2 sending and receiving topics, publishing services, and so on.
 
-For an example of an application that uses micro-rosso, see [oruga](https://github.com/xopxe/micro_rosso_oruga), a tracked robot. In its [platformio.ini](https://github.com/xopxe/micro_rosso_oruga/blob/main/platformio.ini) file you'll see that it's an ESP32 project that uses Arduino framework, uses ROS2 jazzy, and depends on [micro-rosso](https://github.com/xopxe/micro_rosso_platformio) library. It provides its functionality in modules, such as the [mobility system](https://github.com/xopxe/micro_rosso_oruga/tree/main/lib/mobility_tracked). It also depends on external modules, such as [mpu6050](https://github.com/xopxe/micro_rosso_mpu6050) IMU.
+For an example of an application that uses micro-rosso, see [oruga](https://github.com/xopxe/micro_rosso_oruga), a tracked robot. In its [platformio.ini](https://github.com/xopxe/micro_rosso_oruga/blob/main/platformio.ini) file, you'll see that it's an ESP32 project that uses Arduino framework, ROS2 jazzy, and depends on [micro-rosso](https://github.com/xopxe/micro_rosso_platformio) library. It provides its functionality in modules like the [mobility system](https://github.com/xopxe/micro_rosso_oruga/tree/main/lib/mobility_tracked). It also depends on external modules, such as [mpu6050](https://github.com/xopxe/micro_rosso_mpu6050) IMU.
 
 ## Install
 
@@ -20,7 +20,7 @@ You can run a micro-ros installation directly from a docker image. For example, 
 docker run -it --rm --device=/dev/ttyUSB_ESP32 --net=host microros/micro-ros-agent:jazzy serial --dev /dev/ttyUSB_ESP32 -b 115200
 ```
 
-You can change the `humble` for `jazzy`or whatever ROS2 version you are using.
+You can change the `humble` to `jazzy`or whatever ROS2 version you use.
 
 When using wifi transport:
 
@@ -46,7 +46,7 @@ ros2 run micro_ros_setup build_agent.sh
 source ~/microros_ws/install/local_setup.bash
 ```
 
-Once micro-ros is installed, when using serial transport to communicate with the microcontroller you can run it as follows:
+Once micro-ros is installed, when using serial transport to communicate with the microcontroller, you can run it as follows:
 
 ```sh
 ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0
@@ -74,7 +74,7 @@ The files in the micro_rosso library are:
 
 * `include/sync_time.h`, `src/sync_time.cpp`: utility module for a service to synchronize the board's clock to the agent.
 
-* `include/ros_status.h`, `src/ros_status.cpp`: utility module that watches the connection status and can provide output, like lighting a LED when the board is connected to the agent..
+* `include/ros_status.h`, `src/ros_status.cpp`: utility module that watches the connection status and can provide output, like lighting an LED when the board is connected to the agent.
 
 * `ticker.include/h`, `src/ticker.cpp`: utility module that creates a 1Hz timer and uses it to send to a topic regularly.
 
@@ -115,11 +115,11 @@ void loop() {
 }
 ```
 
-The `board_microros_transport` field specifies how the board will communicate with the agent. This example uses the Serial transport, which is the first UART or the same USB link used to flash the board. You can [change the transport](https://github.com/micro-ROS/micro_ros_platformio?tab=readme-ov-file#transport-configuration). Each possible transport (serial, Wi-Fi, etc.) must be configured in your code in the setup() method before starting micro_rosso.
+The `board_microros_transport` field in the `platformio.ini` file specifies how the board will communicate with the agent. This example uses the Serial transport, which is the first UART or the same USB link used to flash the board. You can [change the transport](https://github.com/micro-ROS/micro_ros_platformio?tab=readme-ov-file#transport-configuration). Each possible transport (serial, Wi-Fi, etc.) must be configured in your code in the `setup()`  method before starting micro_rosso.
 
 ## Configuring micro_rosso
 
-The configuration for micro_rosso is stored in [micro_rosso_config.h](include/micro_rosso_config.h) header. Most variables can be manipulated from your `platformio.ini` file through build flags. For example, to configure a serial console to monitor the firmware you could do:
+The configuration for micro_rosso is stored in [micro_rosso_config.h](include/micro_rosso_config.h) header. Most variables can be manipulated from your `platformio.ini` file through build flags. For example, to configure a serial console to monitor the firmware, you could do:
 
 ```ini
 build_flags =
@@ -147,7 +147,7 @@ Another important element to configure is the maximum number of publishers, serv
 }
 ```
 
-The reference this file from your `platformio.ini` file:
+Then reference this file from your `platformio.ini` file:
 
 ```ini
 board_microros_user_meta = myproject.meta
@@ -167,7 +167,7 @@ lib_deps =
 
 /TIP: include from a local folder to reduce rebuilding time/
 
-To start a module, you must include and, if needed, configure it in your `main.cpp`. Following mpu6050 example, add the following somewhere near the top and after the `#include "micro_rosso.h"`:
+To start a module, you must include and, if needed, configure it in your `main.cpp`. Following the mpu6050 example, add the following somewhere near the top and after the `#include "micro_rosso.h"`:
 
 ```cpp
 #include "micro_rosso_mpu6050.h"
@@ -285,7 +285,7 @@ The topic then can be published from methods, timers, event handlers, etc., as f
   msg_tick.data++;
 ```
 
-You can also use custom QoS setting `my_topic.qos = QOS_CUSTOM;` and providing a QoS profile in the `my_topic.qos_profile` field.
+You can also use custom QoS setting `my_topic.qos = QOS_CUSTOM;` and provide a QoS profile in the `my_topic.qos_profile` field.
 
 ### Use and register timers
 
@@ -303,9 +303,9 @@ bool setup() {
 }
 ```
 
-The `last_call_time` parameter is the time since last time the timer triggered, in nanoseconds.
+The `last_call_time` parameter is the time since the last time the timer triggered, in nanoseconds.
 
-It is possible to create new timers. For an example, see the `ticker` module, which creates and provides a 1Hz timer. To do this, first instantiate a timer descriptor. If you want to make it usable by other modules, you can do it in the class definition.
+It is possible to create new timers. For an example, see the `ticker` module, which creates and provides a 1Hz timer. To do this, first, instantiate a timer descriptor. If you want to make it usable by other modules, you can do it in the class definition.
 
 ```cpp
 class MyModule {
@@ -427,7 +427,7 @@ build_flags =
     -DROS_PARAMETER_SERVER=true
 ```
 
-Notice that the parameter server uses additional slots (6?) from the available services. See above in the "## Configuring micro_rosso" section to increase the number of services.
+Notice that the parameter server uses additional slots (6?) from the available services. To increase the number of services, see the "Configuring micro_rosso" section above.
 
 To react to the creation, modification, and removal of configuration parameters, you must subscribe to the `parameter_change_listeners` list:
 
@@ -455,7 +455,7 @@ bool MyModule::setup()
 }
 ```
 
-You might want to create the variables from inside your firmware, and give them initial values. You must do that from a ros status change event, once the ros is connected. For that, you must register a ros status listener as described above and add the parameter creation code:
+You might want to create the variables from inside your firmware and give them initial values. You must do that from a ros status change event once the ros is connected. For that, you must register a ros status listener as described above and add the parameter creation code:
 
 ```cpp
 static void ros_state_cb(ros_states state)
