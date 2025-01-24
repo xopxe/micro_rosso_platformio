@@ -4,7 +4,7 @@
 
 #if defined(LED_ROS2_PIN)
 #define LED_ROS2_CONFIGURE() pinMode(LED_ROS2_PIN, OUTPUT);
-#define LED_ROS2(on)
+#define LED_ROS2(on) digitalWrite(LED_ROS2_PIN, on)
 #else
 #define LED_ROS2_CONFIGURE(...)
 #define LED_ROS2(...)
