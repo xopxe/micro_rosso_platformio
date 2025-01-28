@@ -392,8 +392,22 @@ static bool create_entities()
     subscriber_descriptor *s = micro_rosso::subscribers[i];
     D_print("+subscriber: ");
     D_println(s->topic_name);
-    RCCHECK(rclc_subscription_init_default(
-        &(s->subscriber), &node, s->type_support, s->topic_name));
+
+    switch (s->qos)
+    {
+    case QOS_DEFAULT:
+      RCCHECK(rclc_subscription_init_default(
+          &(s->subscriber), &node, s->type_support, s->topic_name));
+      break;
+    case QOS_BEST_EFFORT:
+      RCCHECK(rclc_subscription_init_best_effort(
+          &(s->subscriber), &node, s->type_support, s->topic_name));
+      break;
+    case QOS_CUSTOM:
+      RCCHECK(rclc_subscription_init(
+          &(s->subscriber), &node, s->type_support, s->topic_name, s->qos_profile));
+      break;
+    }
   }
 
   // create timers

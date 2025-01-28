@@ -208,6 +208,37 @@ A micro\_rosso module is a mostly static object that provides a setup method whe
 
 Things a module can do:
 
+### Publish topics
+
+The following example is derived from the `ticker` module. It will publish (by default)`/tick` topics, of type `int32`.
+
+In `my_module.cpp` create and register the publisher. We will create a static object to store the message to be sent and a publisher object:
+
+```cpp
+static std_msgs__msg__Int32 msg_tick;
+static publisher_descriptor my_topic;
+```
+
+Then, in the setup method, we initialize and register the publisher object :
+
+```cpp
+  msg_tick.data = 0; // also initialize the topic message as needed
+  my_topic.qos = QOS_DEFAULT; // can also be QOS_BEST_EFFORT or QOS_CUSTOM
+  my_topic.type_support = 
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32);
+  my_topic.topic_name = "/tick";
+  micro_rosso::publishers.push_back(&my_topic);
+```
+
+The topic then can be published from methods, timers, event handlers, etc., as follows:
+
+```cpp
+  rcl_publish(&my_topic.publisher, &msg_tick, NULL);
+  msg_tick.data++;
+```
+
+You can also use custom QoS setting `my_topic.qos = QOS_CUSTOM;` and provide a QoS profile in the `my_topic.qos_profile` field.
+
 ### Subscribe to topics
 
 The following example is derived from the [`mobility_tracked`](https://github.com/xopxe/micro_rosso_oruga/tree/main/lib/mobility_tracked) module. It will subscribe to `/cmd_vel` topics of type `cmd_vel`.
@@ -245,6 +276,7 @@ Finally, in the setup method, we initialize and register the subscription object
 
 ```cpp
 bool MyModule::setup() {
+  my_subscription.qos = QOS_DEFAULT;
   my_subscription.type_support = 
     ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist);
   my_subscription.topic_name = "/cmd_vel";
@@ -253,39 +285,9 @@ bool MyModule::setup() {
   micro_rosso::subscribers.push_back(&my_subscription_cmd_vel);
   return true;
 }
-
 ```
 
-### Publish topics
-
-The following example is derived from the `ticker` module. It will publish (by default)`/tick` topics, of type `int32`.
-
-In `my_module.cpp` create and register the publisher. We will create a static object to store the message to be sent and a publisher object:
-
-```cpp
-static std_msgs__msg__Int32 msg_tick;
-static publisher_descriptor my_topic;
-```
-
-Then, in the setup method, we initialize and register the publisher object :
-
-```cpp
-  msg_tick.data = 0; // also initialize the topic message as needed
-  my_topic.qos = QOS_DEFAULT; // can also be QOS_BEST_EFFORT
-  my_topic.type_support = 
-    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32);
-  my_topic.topic_name = "/tick";
-  micro_rosso::publishers.push_back(&my_topic);
-```
-
-The topic then can be published from methods, timers, event handlers, etc., as follows:
-
-```cpp
-  rcl_publish(&my_topic.publisher, &msg_tick, NULL);
-  msg_tick.data++;
-```
-
-You can also use custom QoS setting `my_topic.qos = QOS_CUSTOM;` and provide a QoS profile in the `my_topic.qos_profile` field.
+The QoS functions similarly to how it does in publishers.
 
 ### Use and register timers
 

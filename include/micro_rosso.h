@@ -53,6 +53,8 @@ struct publisher_descriptor
 
 struct subscriber_descriptor
 {
+  QosMode qos;
+  rmw_qos_profile_t *qos_profile; // when qos is QOS_CUSTOM
   rcl_subscription_t subscriber;
   const rosidl_message_type_support_t *type_support;
   const char *topic_name;
