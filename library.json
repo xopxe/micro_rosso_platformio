@@ -17,7 +17,7 @@
       "maintainer": true
     }
   ],
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "homepage": "https://github.com/xopxe/micro_rosso_platformio",
   "dependencies": {
     "micro_ros_platformio": "https://github.com/micro-ROS/micro_ros_platformio"
