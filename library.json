@@ -1,27 +1,27 @@
 {
-    "name": "micro_rosso",
-    "version": "0.3.1",
-    "description": "A modular system for micro-ros",
-    "keywords": "ros, micro-ros, robot, micro_rosso",
-    "repository":
+  "name": "micro_rosso",
+  "version": "0.4.0",
+  "description": "A modular system for micro-ros",
+  "keywords": "ros, micro-ros, robot, micro_rosso",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/xopxe/micro_rosso_platformio.git"
+  },
+  "authors":
+  [
     {
-      "type": "git",
-      "url": "https://github.com/xopxe/micro_rosso_platformio.git"
-    },
-    "authors":
-    [
-      {
-        "name": "Jorge Visca",
-        "email": "jvisca@fing.edu.uy",
-        "url": "https://www.fing.edu.uy/~jvisca/",
-        "maintainer": true
-      }
-    ],
-    "license": "MIT",
-    "homepage": "https://github.com/xopxe/micro_rosso_platformio",
-    "dependencies": {
-      "micro_ros_platformio": "https://github.com/micro-ROS/micro_ros_platformio"
-    },
-    "frameworks": "arduino",
-    "platforms": "espressif32"
-  }
+      "name": "Jorge Visca",
+      "email": "jvisca@fing.edu.uy",
+      "url": "https://www.fing.edu.uy/~jvisca/",
+      "maintainer": true
+    }
+  ],
+  "license": "Apache 2.0",
+  "homepage": "https://github.com/xopxe/micro_rosso_platformio",
+  "dependencies": {
+    "micro_ros_platformio": "https://github.com/micro-ROS/micro_ros_platformio"
+  },
+  "frameworks": "arduino",
+  "platforms": "espressif32"
+}

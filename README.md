@@ -119,14 +119,13 @@ The `board_microros_transport` field in the `platformio.ini` file specifies how 
 
 ## Configuring micro_rosso
 
-The configuration for micro_rosso is stored in [micro_rosso_config.h](include/micro_rosso_config.h) header. Most variables can be manipulated from your `platformio.ini` file through build flags. For example, to configure a serial console to monitor the firmware, you could do:
+The configuration for micro_rosso is stored in [micro_rosso_config.h](include/micro_rosso_config.h) header. Most variables can be manipulated from your `platformio.ini` file through build flags. For example, to use a specific ROS domain you can set:
 
 ```ini
 build_flags =
-    -DDEBUG_CONSOLE=Serial1
-    -DDEBUG_CONSOLE_PIN_RX=10
-    -DDEBUG_CONSOLE_PIN_TX=9
-    -DDEBUG_CONSOLE_BAUD=115200
+    ...
+    -DROS_DOMAIN_ID=20
+    ...
 ```
 
 Another important element to configure is the maximum number of publishers, services, subscriptions, etc. For this, first add a `myproject.meta` file, for example:
@@ -187,7 +186,7 @@ void setup() {
 
 Check the `setup()` call to see what optional parameter you can pass to it, such as the I2C channel, topic names, etc.
 
-Usually, the modules' setup method returns `false` if something fails. `D_print` and `D_println` are macros that print to a debug console. You can configure the serial debug consoles by passing build flags from your project's `platformio.ini`. For example:
+Usually, the modules' setup method returns `false` if something fails. `D_print` and `D_println` are macros that print to a debug console. You can configure the serial debug consoles by passing build flags from your project's `platformio.ini` as described above. For example:
 
 ```ini
 build_flags =
@@ -195,8 +194,10 @@ build_flags =
     -DDEBUG_CONSOLE_PIN_RX=10
     -DDEBUG_CONSOLE_PIN_TX=9
     -DDEBUG_CONSOLE_BAUD=115200
-
+    ...
 ```
+
+/TIP: if RX or TX are not defined, then the default pins for the used Serial will be used.
 
 ## How to write a module
 
