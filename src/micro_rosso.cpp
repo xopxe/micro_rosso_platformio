@@ -13,6 +13,14 @@
 static RESET_REASON reset_reason_0;
 static RESET_REASON reset_reason_1;
 
+#if !defined(ROS_NAMESPACE)
+#define ROS_NAMESPACE ""
+#endif
+
+#if !defined(ROS_DOMAIN_ID)
+#define ROS_DOMAIN_ID 0
+#endif
+
 #if ROS_PARAMETER_SERVER
 rclc_parameter_server_t micro_rosso::param_server;
 #endif
@@ -220,7 +228,7 @@ bool on_parameter_changed(const Parameter *old_param, const Parameter *new_param
 
 bool micro_rosso::setup(const char *rosname)
 {
-  
+
 #if defined(DEBUG_CONSOLE)
 #if !defined(DEBUG_CONSOLE_PIN_RX)
 #define DEBUG_CONSOLE_PIN_RX -1
@@ -228,7 +236,7 @@ bool micro_rosso::setup(const char *rosname)
 #if !defined(DEBUG_CONSOLE_PIN_TX)
 #define DEBUG_CONSOLE_PIN_TX -1
 #endif
-D_SerialBegin(DEBUG_CONSOLE_BAUD, SERIAL_8N1, DEBUG_CONSOLE_PIN_RX, DEBUG_CONSOLE_PIN_TX);
+  D_SerialBegin(DEBUG_CONSOLE_BAUD, SERIAL_8N1, DEBUG_CONSOLE_PIN_RX, DEBUG_CONSOLE_PIN_TX);
 #endif
 
   D_println("Setting up micro_rosso started... ");
@@ -361,22 +369,24 @@ static bool create_entities()
   allocator = rcl_get_default_allocator();
 
   // create init_options
-  //RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
-  rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
-  RCCHECK(rcl_init_options_init(&init_options, allocator));
-
-  // Set ROS domain id
-  #if defined(ROS_DOMAIN_ID)
   D_print("Setting ROS_DOMAIN_ID: ");
   D_println(ROS_DOMAIN_ID);
+
+  // RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
+  rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
+  RCCHECK(rcl_init_options_init(&init_options, allocator));
   RCCHECK(rcl_init_options_set_domain_id(&init_options, ROS_DOMAIN_ID));
-  #endif
 
   // Setup support structure.
   RCCHECK(rclc_support_init_with_options(&support, 0, NULL, &init_options, &allocator));
 
+  // Clean up initialization options
+  RCCHECK(rcl_init_options_fini(&init_options));
+
   // create node
-  RCCHECK(rclc_node_init_default(&node, ros2_node_name, "", &support));
+  RCCHECK(rclc_node_init_default(&node, ros2_node_name, ROS_NAMESPACE, &support));
+
+  delay(2000);
 
   micro_rosso::time_sync();
 
